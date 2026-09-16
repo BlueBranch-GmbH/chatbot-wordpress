@@ -47,7 +47,7 @@ class Sse {
 		 * A compressed response cannot be flushed chunk by chunk: zlib holds the
 		 * bytes back until it has enough of them to compress.
 		 */
-		// phpcs:ignore WordPress.PHP.IniSet.Risky -- Switching compression off for this one response is the only way to stream it at all.
+		// phpcs:ignore WordPress.PHP.IniSet.Risky, Squiz.PHP.DiscouragedFunctions.Discouraged -- Switching compression off for this one response is the only way to stream it at all.
 		ini_set( 'zlib.output_compression', '0' );
 
 		while ( ob_get_level() > 0 ) {

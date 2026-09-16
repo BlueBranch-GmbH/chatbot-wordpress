@@ -24,7 +24,6 @@ class Plugin {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'init', array( $this, 'load_textdomain' ) );
 		add_action( 'init', array( $this, 'register_meta' ) );
 
 		( new Crawl_Marker() )->register();
@@ -37,22 +36,6 @@ class Plugin {
 		if ( is_admin() ) {
 			( new Admin\Admin() )->register();
 		}
-	}
-
-	/**
-	 * Loads the bundled translations.
-	 *
-	 * Called on init rather than at file level: loading a text domain before
-	 * WordPress is ready triggers a _doing_it_wrong notice as of WordPress 6.7.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain(
-			'bluebranch-chatbot',
-			false,
-			dirname( plugin_basename( BLUEBRANCH_CHATBOT_FILE ) ) . '/languages'
-		);
 	}
 
 	/**
