@@ -1,0 +1,307 @@
+/**
+ * The plugin's admin screens.
+ *
+ * Built on the classes wp-admin already provides, so the screens keep looking
+ * like WordPress when the admin colour scheme changes.
+ */
+
+.bluebranch-chatbot-card {
+	margin: 20px 0;
+	padding: 16px 20px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+}
+
+.bluebranch-chatbot-card > h2:first-child {
+	margin-top: 0;
+}
+
+.bluebranch-chatbot-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-end;
+	margin-bottom: 12px;
+}
+
+.bluebranch-chatbot-toolbar__field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.bluebranch-chatbot-toolbar__field > span {
+	font-weight: 600;
+}
+
+.bluebranch-chatbot-toolbar .button-link-delete {
+	margin-left: auto;
+}
+
+.bluebranch-chatbot-col--narrow {
+	width: 110px;
+}
+
+.bluebranch-chatbot-url {
+	color: #646970;
+	font-size: 12px;
+	word-break: break-all;
+}
+
+.bluebranch-chatbot-tier {
+	margin: 16px 0;
+	padding: 10px 14px;
+	border-left: 4px solid #2271b1;
+	background: #f0f6fc;
+}
+
+#bluebranch-chatbot-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 12px;
+}
+
+.bluebranch-chatbot-progress {
+	margin: 16px 0;
+}
+
+.bluebranch-chatbot-progress__bar {
+	height: 12px;
+	border-radius: 6px;
+	background: #dcdcde;
+	overflow: hidden;
+}
+
+.bluebranch-chatbot-progress__bar span {
+	display: block;
+	width: 0;
+	height: 100%;
+	background: #2271b1;
+	transition: width 0.2s ease;
+}
+
+.bluebranch-chatbot-log {
+	max-height: 260px;
+	overflow-y: auto;
+	margin: 12px 0 0;
+	font-size: 12px;
+}
+
+.bluebranch-chatbot-log li {
+	margin: 0;
+	padding: 2px 0 2px 18px;
+	position: relative;
+}
+
+.bluebranch-chatbot-log li::before {
+	position: absolute;
+	left: 0;
+}
+
+.bluebranch-chatbot-log li.is-ok::before {
+	content: "\2713";
+	color: #008a20;
+}
+
+.bluebranch-chatbot-log li.is-failed::before {
+	content: "\2717";
+	color: #d63638;
+}
+
+/* :not([hidden]) again: without it the empty preview shows a broken image. */
+.bluebranch-chatbot-media__preview:not([hidden]) {
+	display: block;
+	max-width: 48px;
+	max-height: 48px;
+	margin-bottom: 8px;
+}
+
+.bluebranch-chatbot-preview {
+	max-height: 360px;
+	overflow: auto;
+	padding: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	white-space: pre-wrap;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.bluebranch-chatbot-warning {
+	color: #b32d2e;
+}
+
+.bluebranch-chatbot-log li.is-unchanged::before {
+	content: "\2013";
+	color: #646970;
+}
+
+.bluebranch-chatbot-log li.is-removed::before,
+.bluebranch-chatbot-log li.is-skipped::before {
+	content: "\2013";
+	color: #996800;
+}
+
+/**
+ * The test chatbot on the trained content screen.
+ *
+ * Almost nothing here on purpose. The test uses the very same template and the
+ * very same stylesheet a visitor gets -- that is what makes it a test rather
+ * than a picture of one. An admin copy of those rules existed for a while and
+ * only fought with the front end over which one won, which is how the send
+ * button ended up sitting inside the field.
+ *
+ * What is left are the two things wp-admin genuinely needs: a reading width,
+ * and a surface that reads on the grey admin background.
+ */
+
+.bluebranch-chatbot-admin .chatbot-ask-container {
+	max-width: 780px;
+	margin-top: 16px;
+}
+
+.bluebranch-chatbot-admin .chatbot-ask-form,
+.bluebranch-chatbot-admin .chatbot-content:not(:empty) {
+	background: #fff;
+}
+
+/* wp-admin gives every input its own border and shadow; here the frame around
+   field and button is the control, so the field itself must stay bare. */
+.bluebranch-chatbot-admin .chatbot-ask-input,
+.bluebranch-chatbot-admin .chatbot-ask-input:focus {
+	border: 0;
+	box-shadow: none;
+	outline: none;
+	min-height: 0;
+}
+
+/**
+ * The settings screen.
+ *
+ * WordPress's form-table is built for a handful of fields and grows airy at
+ * two dozen. The spacing is tightened and the descriptions are given a reading
+ * width, so the page can be taken in rather than scrolled through.
+ */
+
+.bluebranch-chatbot-titlebar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 4px;
+	padding: 0;
+}
+
+.bluebranch-chatbot-titlebar h1 {
+	margin: 0;
+	padding: 0;
+}
+
+/* Sticks to the top so the button stays reachable from anywhere on the page. */
+@supports (position: sticky) {
+	.bluebranch-chatbot-admin--settings .bluebranch-chatbot-titlebar {
+		position: sticky;
+		top: 32px;
+		z-index: 10;
+		padding: 10px 0;
+		background: #f0f0f1;
+		border-bottom: 1px solid #dcdcde;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.bluebranch-chatbot-admin--settings .bluebranch-chatbot-titlebar {
+		position: static;
+	}
+}
+
+.bluebranch-chatbot-admin--settings h2 {
+	margin: 24px 0 0;
+	padding: 0 0 6px;
+	font-size: 15px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.bluebranch-chatbot-admin--settings .form-table {
+	margin-top: 4px;
+}
+
+.bluebranch-chatbot-admin--settings .form-table th,
+.bluebranch-chatbot-admin--settings .form-table td {
+	padding: 10px 10px 10px 0;
+	vertical-align: top;
+}
+
+.bluebranch-chatbot-admin--settings .form-table th {
+	width: 190px;
+	padding-top: 14px;
+	font-weight: 600;
+}
+
+.bluebranch-chatbot-admin--settings .form-table .description {
+	max-width: 62ch;
+	margin-top: 4px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #646970;
+}
+
+.bluebranch-chatbot-admin--settings .form-table input[type="text"],
+.bluebranch-chatbot-admin--settings .form-table input[type="url"],
+.bluebranch-chatbot-admin--settings .form-table input[type="password"],
+.bluebranch-chatbot-admin--settings .form-table textarea,
+.bluebranch-chatbot-admin--settings .form-table select {
+	max-width: 420px;
+}
+
+/* Related switches sit together as one decision rather than one row each. */
+.bluebranch-chatbot-group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.bluebranch-chatbot-group label {
+	line-height: 1.5;
+}
+
+.bluebranch-chatbot-admin--settings fieldset label {
+	margin-bottom: 0;
+}
+
+.bluebranch-chatbot-admin--settings .submit {
+	margin: 16px 0 0;
+	padding: 0;
+}
+
+/* The usage tier of the stored key, shown wherever the key matters. */
+.bluebranch-chatbot-tier.is-premium {
+	border-left-color: #8c5e00;
+	background: #fcf9e8;
+}
+
+.bluebranch-chatbot-tier strong {
+	display: inline-block;
+	margin-right: 6px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: #2271b1;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	vertical-align: 1px;
+}
+
+.bluebranch-chatbot-tier.is-premium strong {
+	background: #8c5e00;
+}
+
+/* On the settings screen it sits above the sticky title bar, not in a card. */
+.bluebranch-chatbot-admin--settings .bluebranch-chatbot-tier {
+	margin: 12px 0 0;
+}

@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "bluebranch-chatbot/search",
+	"title": "Chatbot Search Answer",
+	"category": "widgets",
+	"icon": "search",
+	"description": "A question field with its answer below it, or the AI answer above your search results.",
+	"textdomain": "bluebranch-chatbot",
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "bluebranch-chatbot-blocks"
+}

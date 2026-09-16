@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "bluebranch-chatbot/widget",
+	"title": "Chatbot Widget",
+	"category": "widgets",
+	"icon": "format-chat",
+	"description": "A collapsible chat button that answers from your own content.",
+	"textdomain": "bluebranch-chatbot",
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "bluebranch-chatbot-blocks"
+}

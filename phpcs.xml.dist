@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<ruleset name="BlueBranch Chatbot">
+	<description>WordPress coding standards for the BlueBranch Chatbot plugin.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg value="ps"/>
+
+	<rule ref="WordPress">
+		<!--
+			The plugin namespaces everything under BlueBranch\Chatbot, which is
+			the prefix this sniff asks for; it cannot see namespaces, so it is
+			told the prefixes explicitly below instead.
+		-->
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="BlueBranch\Chatbot"/>
+				<element value="bluebranch_chatbot"/>
+				<element value="BLUEBRANCH_CHATBOT"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!--
+		DOM node properties are named by PHP, not by this plugin. The sniff
+		cannot tell them from a property we chose, so they are listed here
+		rather than suppressed one by one at every use.
+	-->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="allowed_custom_properties" type="array">
+				<element value="childNodes"/>
+				<element value="nodeName"/>
+				<element value="nodeType"/>
+				<element value="textContent"/>
+				<element value="parentNode"/>
+				<element value="nodeValue"/>
+				<element value="ownerDocument"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="bluebranch-chatbot"/>
+			</property>
+		</properties>
+	</rule>
+
+	<config name="minimum_wp_version" value="6.0"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+	<config name="testVersion" value="7.4-"/>
+</ruleset>

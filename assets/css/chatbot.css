@@ -1,0 +1,881 @@
+/**
+ * Chatbot Widget — default styling
+ *
+ * All colors/sizes are exposed as custom properties on .chatbot-widget so a
+ * project's own stylesheet can rebrand the widget without touching this file.
+ */
+
+.chatbot-widget {
+    --chatbot-widget-accent: #2b6cb0;
+    --chatbot-widget-accent-contrast: #ffffff;
+    --chatbot-widget-bg: #ffffff;
+    --chatbot-widget-text: #26282b;
+    --chatbot-widget-muted: #6b7280;
+    --chatbot-widget-border: #e5e7eb;
+    --chatbot-widget-bot-bubble: #f2f4f7;
+    --chatbot-widget-radius: 16px;
+    --chatbot-widget-gap: 24px;
+    --chatbot-widget-z-index: 999999;
+    --chatbot-widget-font: inherit;
+    --chatbot-widget-message-font-size: 15px;
+
+    position: fixed;
+    z-index: var(--chatbot-widget-z-index);
+    font-family: var(--chatbot-widget-font);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.chatbot-widget[data-position="bottom-right"] { bottom: var(--chatbot-widget-gap); right: var(--chatbot-widget-gap); }
+.chatbot-widget[data-position="bottom-left"]  { bottom: var(--chatbot-widget-gap); left: var(--chatbot-widget-gap); }
+.chatbot-widget[data-position="top-right"]    { top: var(--chatbot-widget-gap); right: var(--chatbot-widget-gap); }
+.chatbot-widget[data-position="top-left"]     { top: var(--chatbot-widget-gap); left: var(--chatbot-widget-gap); }
+
+.chatbot-widget__toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border: 0;
+    cursor: pointer;
+    background: var(--chatbot-widget-accent);
+    color: var(--chatbot-widget-accent-contrast);
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    font: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chatbot-widget__toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+/* Same cascade-origin caveat as the panel below: author CSS's unconditional
+   'display: flex' above would otherwise beat the UA's [hidden] rule. */
+.chatbot-widget__toggle[hidden] {
+    display: none;
+}
+
+.chatbot-widget__toggle-icon {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    background-color: currentColor;
+    -webkit-mask: var(--chatbot-widget-icon, url(../icons/ai.svg)) center / contain no-repeat;
+    mask: var(--chatbot-widget-icon, url(../icons/ai.svg)) center / contain no-repeat;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.chatbot-widget__toggle.is-active .chatbot-widget__toggle-icon {
+    transform: rotate(90deg);
+    opacity: 0.85;
+}
+
+.chatbot-widget__badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e53e3e;
+    border: 2px solid var(--chatbot-widget-bg);
+}
+
+.chatbot-widget__panel {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: min(380px, calc(100vw - 2 * var(--chatbot-widget-gap)));
+    height: min(560px, calc(100vh - 2 * var(--chatbot-widget-gap)));
+    max-height: 80vh;
+    background: var(--chatbot-widget-bg);
+    color: var(--chatbot-widget-text);
+    border-radius: var(--chatbot-widget-radius);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+    opacity: 0;
+    transform: scale(0.35);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chatbot-widget__panel.is-open {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Author CSS always wins over the UA stylesheet's [hidden] { display: none }
+   regardless of specificity, so the plain 'display: flex' above would keep
+   the panel laid out (just invisible via opacity) while hidden is set.
+   This restores real display:none for the closed state. */
+.chatbot-widget__panel[hidden] {
+    display: none;
+}
+
+.chatbot-widget[data-position$="right"] .chatbot-widget__panel { right: 0; transform-origin: bottom right; }
+.chatbot-widget[data-position$="left"] .chatbot-widget__panel { left: 0; transform-origin: bottom left; }
+.chatbot-widget[data-position^="bottom"] .chatbot-widget__panel { bottom: calc(100% + 12px); }
+.chatbot-widget[data-position^="top"] .chatbot-widget__panel { top: calc(100% + 12px); }
+.chatbot-widget[data-position="top-right"] .chatbot-widget__panel { transform-origin: top right; }
+.chatbot-widget[data-position="top-left"] .chatbot-widget__panel { transform-origin: top left; }
+
+@media (prefers-reduced-motion: reduce) {
+    .chatbot-widget__panel {
+        transition: none;
+        transform: none;
+    }
+}
+
+.chatbot-widget__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: 16px 20px;
+    background: var(--chatbot-widget-accent);
+    color: var(--chatbot-widget-accent-contrast);
+}
+
+.chatbot-widget__header-title {
+    font-weight: 700;
+}
+
+.chatbot-widget__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chatbot-widget__font-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.chatbot-widget__font-btn,
+.chatbot-widget__clear,
+.chatbot-widget__close {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 0;
+    outline: none;
+    outline-offset: 2px;
+    background: transparent;
+    color: inherit;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.chatbot-widget__font-btn {
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-family: inherit;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+.chatbot-widget__font-btn:hover {
+    opacity: 1;
+}
+
+.chatbot-widget__font-btn--dec {
+    font-size: 10px;
+}
+
+.chatbot-widget__font-btn--inc {
+    font-size: 15px;
+}
+
+.chatbot-widget__close:hover,
+.chatbot-widget__close:active {
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+
+.chatbot-widget__close:focus-visible {
+    outline: 2px solid currentColor;
+}
+
+.chatbot-widget__clear {
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+.chatbot-widget__clear:hover {
+    opacity: 1;
+}
+
+.chatbot-widget__close {
+    font-size: 22px;
+}
+
+.chatbot-widget__messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px;
+}
+
+.chatbot-widget__message {
+    display: flex;
+}
+
+.chatbot-widget__message--user {
+    justify-content: flex-end;
+}
+
+.chatbot-widget__message--bot {
+    justify-content: flex-start;
+}
+
+.chatbot-widget__bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: var(--chatbot-widget-message-font-size);
+}
+
+.chatbot-widget__bubble > :first-child {
+    margin-top: 0;
+}
+
+.chatbot-widget__bubble > :last-child {
+    margin-bottom: 0;
+}
+
+.chatbot-widget__message--user .chatbot-widget__bubble {
+    background: var(--chatbot-widget-accent);
+    color: var(--chatbot-widget-accent-contrast);
+    border-bottom-right-radius: 4px;
+    font-size: calc(var(--chatbot-widget-message-font-size) - 1px);
+}
+
+.chatbot-widget__message--bot .chatbot-widget__bubble {
+    background: var(--chatbot-widget-bot-bubble);
+    color: var(--chatbot-widget-text);
+    border-bottom-left-radius: 4px;
+}
+
+.chatbot-widget__typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px;
+}
+
+.chatbot-widget__typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--chatbot-widget-muted);
+    animation: chatbot-widget-typing 1s infinite ease-in-out;
+}
+
+.chatbot-widget__typing span:nth-child(2) { animation-delay: 0.15s; }
+.chatbot-widget__typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes chatbot-widget-typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.chatbot-widget__sources {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 8px 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chatbot-widget__sources a {
+    font-size: 0.8rem;
+    color: inherit;
+    opacity: 0.8;
+}
+
+.chatbot-widget__suggestions {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    gap: 6px;
+    padding: 0 12px 12px;
+    flex: 0 0 auto;
+}
+
+.chatbot-widget__suggestions[hidden] {
+    display: none;
+}
+
+.chatbot-widget__suggestion {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border: 1px solid var(--chatbot-widget-border);
+    background: var(--chatbot-widget-bg);
+    color: var(--chatbot-widget-accent);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.chatbot-widget__suggestion:hover:not(:disabled) {
+    background: var(--chatbot-widget-bot-bubble);
+    border-color: var(--chatbot-widget-accent);
+}
+
+.chatbot-widget__suggestion:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chatbot-widget__form {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--chatbot-widget-border);
+}
+
+.chatbot-widget__input {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1 1 auto;
+    resize: none;
+    max-height: 120px;
+    border: 0;
+    outline: none;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--chatbot-widget-text);
+    background: var(--chatbot-widget-bot-bubble);
+}
+
+.chatbot-widget__input:hover {
+    border: 0;
+    outline: none;
+}
+
+.chatbot-widget__input:focus {
+    outline: 2px solid var(--chatbot-widget-accent);
+    outline-offset: 1px;
+}
+
+.chatbot-widget__send {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--chatbot-widget-accent);
+    color: var(--chatbot-widget-accent-contrast);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.chatbot-widget__send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Waehrend der Antwort ist derselbe Knopf der Stopp-Knopf. */
+.chatbot-widget__send--stop {
+    background: var(--chatbot-widget-muted);
+    font-size: 12px;
+}
+
+.chatbot-widget__footer {
+    flex: 0 0 auto;
+    padding: 6px 12px 10px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--chatbot-widget-muted);
+}
+
+@media (max-width: 480px) {
+    .chatbot-widget__panel {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+    }
+}
+
+/**
+ * The ask field and the search answer.
+ *
+ * These two sit inside the theme's own content, not in a corner of the screen
+ * like the chat button, so everything here is built out of custom properties
+ * and inherited colour. A plugin dropped into an unknown theme cannot know
+ * whether it has landed on white or on near-black; using currentColor and
+ * translucent neutrals means it reads correctly on both without guessing.
+ *
+ * Override any of the properties below to rebrand it. --chatbot-answer-accent
+ * follows the accent colour from the settings on its own.
+ */
+
+.chatbot-ask-container,
+.chatbot-generate-search-container {
+    --chatbot-answer-accent: var(--chatbot-widget-accent, #2b6cb0);
+    --chatbot-answer-accent-contrast: var(--chatbot-widget-accent-contrast, #ffffff);
+    --chatbot-answer-radius: 14px;
+
+    /*
+     * Mid grey with alpha, not black with alpha and not white with alpha.
+     * A 50% grey is darker than a light background and lighter than a dark
+     * one, so one value reads on both without anybody having to declare which
+     * kind of theme this is.
+     */
+    --chatbot-answer-border: rgba(128, 128, 128, 0.35);
+    --chatbot-answer-surface: rgba(128, 128, 128, 0.08);
+    --chatbot-answer-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.06);
+
+    /*
+     * Quieter text follows the theme's own colour and is dimmed, rather than
+     * being given a colour of its own.
+     *
+     * The obvious alternative -- swapping the palette under
+     * @media (prefers-color-scheme: dark) -- is wrong here, and was wrong here.
+     * That query reports what the reader asked their operating system for, not
+     * what this theme actually renders. A light theme on a dark-mode machine
+     * was handed light grey text on its white background, which is how the
+     * typed placeholder came to be invisible rather than absent.
+     */
+    --chatbot-answer-muted: currentColor;
+    --chatbot-answer-muted-opacity: 0.62;
+
+    margin: 1.5rem 0;
+}
+
+/* --- the question field ------------------------------------------------- */
+
+.chatbot-ask-form {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 0;
+    padding: 4px;
+    border: 1px solid var(--chatbot-answer-border);
+    border-radius: var(--chatbot-answer-radius);
+    background: var(--chatbot-answer-surface);
+    box-shadow: var(--chatbot-answer-shadow);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/*
+ * The ring goes on the wrapper, not the input, so the field and the button
+ * light up as the single control they look like.
+ */
+.chatbot-ask-form:focus-within {
+    border-color: var(--chatbot-answer-accent);
+    /*
+     * Two declarations on purpose. A browser without color-mix() throws the
+     * second one away, and without the first it would be left with no focus
+     * ring at all -- which is the one thing this must not lose.
+     */
+    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.22);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--chatbot-answer-accent) 22%, transparent);
+}
+
+.chatbot-ask-form .chatbot-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+
+.chatbot-ask-form .chatbot-field--submit {
+    flex: 0 0 auto;
+}
+
+.chatbot-ask-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: calc(var(--chatbot-answer-radius) - 5px);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 48px;
+    /* Safari draws its own ring and inner shadow on type=search. */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.chatbot-ask-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.chatbot-ask-input::placeholder {
+    color: var(--chatbot-answer-muted);
+    opacity: var(--chatbot-answer-muted-opacity);
+}
+
+.chatbot-submit {
+    height: 48px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: calc(var(--chatbot-answer-radius) - 5px);
+    background: var(--chatbot-answer-accent);
+    color: var(--chatbot-answer-accent-contrast);
+    font: inherit;
+    font-weight: 600;
+    line-height: 48px;
+    cursor: pointer;
+    transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+.chatbot-submit:hover,
+.chatbot-submit:focus-visible {
+    filter: brightness(0.92);
+}
+
+.chatbot-submit:active {
+    transform: translateY(1px);
+}
+
+.chatbot-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* --- the answer ---------------------------------------------------------- */
+
+.chatbot-response {
+    margin: 1.25rem 0 0;
+}
+
+.chatbot-loading:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0 0 0.75rem;
+    padding: 0.3em 0.9em;
+    border-radius: 999px;
+    background: var(--chatbot-answer-surface);
+    border: 1px solid var(--chatbot-answer-border);
+    color: var(--chatbot-answer-muted);
+    opacity: var(--chatbot-answer-muted-opacity);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.6;
+}
+
+.chatbot-loading::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--chatbot-answer-accent);
+    animation: chatbot-answer-pulse 1.1s ease-in-out infinite;
+}
+
+.chatbot-loading.finished::before {
+    animation: none;
+    opacity: 0.4;
+}
+
+@keyframes chatbot-answer-pulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50%      { opacity: 1;    transform: scale(1); }
+}
+
+/*
+ * :not(:empty) keeps the card from standing there as an empty outline before
+ * the first chunk of the answer has arrived.
+ */
+.chatbot-content:not(:empty) {
+    position: relative;
+    padding: 1.35rem 1.5rem;
+    border: 1px solid var(--chatbot-answer-border);
+    border-radius: var(--chatbot-answer-radius);
+    background: var(--chatbot-answer-surface);
+    box-shadow: var(--chatbot-answer-shadow);
+    line-height: 1.7;
+    overflow-wrap: break-word;
+}
+
+/* The accent edge, inset so it follows the rounded corner. */
+.chatbot-content:not(:empty)::before {
+    content: "";
+    position: absolute;
+    top: 1.35rem;
+    bottom: 1.35rem;
+    left: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--chatbot-answer-accent);
+}
+
+.chatbot-content > *:first-child { margin-top: 0; }
+.chatbot-content > *:last-child  { margin-bottom: 0; }
+
+.chatbot-content h1,
+.chatbot-content h2,
+.chatbot-content h3,
+.chatbot-content h4 {
+    margin: 1.4em 0 0.5em;
+    line-height: 1.3;
+    font-size: 1.1em;
+}
+
+.chatbot-content p { margin: 0 0 0.9em; }
+
+.chatbot-content ul,
+.chatbot-content ol {
+    margin: 0 0 0.9em;
+    padding-left: 1.3em;
+}
+
+.chatbot-content li { margin: 0.25em 0; }
+
+.chatbot-content a {
+    color: var(--chatbot-answer-accent);
+    text-underline-offset: 2px;
+}
+
+.chatbot-content code {
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    background: var(--chatbot-answer-surface);
+    border: 1px solid var(--chatbot-answer-border);
+    font-size: 0.9em;
+}
+
+.chatbot-content pre {
+    margin: 0 0 0.9em;
+    padding: 1em;
+    border-radius: 8px;
+    background: var(--chatbot-answer-surface);
+    border: 1px solid var(--chatbot-answer-border);
+    overflow-x: auto;
+}
+
+.chatbot-content pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+.chatbot-content blockquote {
+    margin: 0 0 0.9em;
+    padding-left: 1em;
+    border-left: 3px solid var(--chatbot-answer-border);
+    color: var(--chatbot-answer-muted);
+    opacity: var(--chatbot-answer-muted-opacity);
+}
+
+.chatbot-content table {
+    width: 100%;
+    margin: 0 0 0.9em;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.chatbot-content th,
+.chatbot-content td {
+    padding: 0.45em 0.7em;
+    border: 1px solid var(--chatbot-answer-border);
+    text-align: left;
+}
+
+.chatbot-error {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--chatbot-answer-border);
+    border-left: 3px solid #d63638;
+    border-radius: var(--chatbot-answer-radius);
+    background: var(--chatbot-answer-surface);
+}
+
+/* --- sources ------------------------------------------------------------- */
+
+.chatbot-sources {
+    margin-top: 1rem;
+}
+
+.chatbot-sources p {
+    margin: 0 0 0.5em;
+    color: var(--chatbot-answer-muted);
+    opacity: var(--chatbot-answer-muted-opacity);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chatbot-sources ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chatbot-sources li { margin: 0; }
+
+.chatbot-sources a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    max-width: 22rem;
+    padding: 0.35em 0.85em;
+    border: 1px solid var(--chatbot-answer-border);
+    border-radius: 999px;
+    background: var(--chatbot-answer-surface);
+    color: inherit;
+    font-size: 0.82rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+/* The title may be long; the arrow must not be pushed out with it. */
+.chatbot-source__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chatbot-source__arrow {
+    flex: 0 0 auto;
+    font-size: 0.85em;
+    line-height: 1;
+    opacity: 0.65;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.chatbot-sources a:hover .chatbot-source__arrow,
+.chatbot-sources a:focus-visible .chatbot-source__arrow {
+    opacity: 1;
+    transform: translate(1px, -1px);
+}
+
+/*
+ * Present to a screen reader, absent to everyone else. The arrow says "new
+ * tab" to the eye; this says it to the ear.
+ */
+.chatbot-sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- suggestion pills ---------------------------------------------------- */
+
+.chatbot-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: 0.85rem 0 0;
+}
+
+.chatbot-suggestion {
+    padding: 0.5em 1em;
+    border: 1px solid var(--chatbot-answer-border);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.chatbot-suggestion:hover,
+.chatbot-suggestion:focus-visible {
+    border-color: var(--chatbot-answer-accent);
+    color: var(--chatbot-answer-accent);
+    background: var(--chatbot-answer-surface);
+}
+
+.chatbot-suggestion:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chatbot-sources a:hover,
+.chatbot-sources a:focus-visible {
+    border-color: var(--chatbot-answer-accent);
+    color: var(--chatbot-answer-accent);
+}
+
+/* Only administrators ever see this, and only while no key is stored. */
+.bluebranch-chatbot-notice {
+    padding: 12px 16px;
+    border-left: 4px solid #d63638;
+    background: rgba(214, 54, 56, 0.08);
+}
+
+@media (max-width: 600px) {
+    .chatbot-ask-form {
+        flex-wrap: wrap;
+    }
+
+    .chatbot-ask-form .chatbot-field,
+    .chatbot-ask-form .chatbot-field--submit,
+    .chatbot-submit {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chatbot-loading::before,
+    .chatbot-ask-form,
+    .chatbot-submit,
+    .chatbot-sources a {
+        transition: none;
+        animation: none;
+    }
+}
+
+/*
+ * The same button, in its other job.
+ *
+ * Deliberately not the accent colour: the accent means "this is the thing to
+ * press", and stopping is not. It steps back to a neutral tone so the state is
+ * legible at a glance without shouting.
+ */
+.chatbot-submit--stop {
+    background: rgba(128, 128, 128, 0.85);
+    color: #fff;
+}
+
+.chatbot-submit--stop:hover,
+.chatbot-submit--stop:focus-visible {
+    background: rgba(128, 128, 128, 1);
+    filter: none;
+}

@@ -1,0 +1,35 @@
+{
+	"name": "bluebranch/chatbot-wordpress",
+	"description": "AI chat and AI search for WordPress, answering from your own content only.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://github.com/BlueBranch-GmbH/chatbot-wordpress",
+	"authors": [
+		{
+			"name": "Lukas M. Beck",
+			"email": "lb@bluebranch.de",
+			"homepage": "https://www.bluebranch.de/"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/BlueBranch-GmbH/chatbot-wordpress/issues",
+		"source": "https://github.com/BlueBranch-GmbH/chatbot-wordpress"
+	},
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "^3.9",
+		"wp-coding-standards/wpcs": "^3.1",
+		"phpcompatibility/phpcompatibility-wp": "^2.1"
+	},
+	"scripts": {
+		"lint": "phpcs",
+		"fix": "phpcbf"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}
