@@ -177,7 +177,7 @@ class Api_Client {
 		$url = $this->base() . $endpoint;
 
 		if ( ! empty( $options['query'] ) ) {
-			$url = add_query_arg( $options['query'], $url );
+			$url = add_query_arg( self::encode_query( $options['query'] ), $url );
 		}
 
 		$args = array(
@@ -271,7 +271,7 @@ class Api_Client {
 			$query['max_tokens'] = $max_tokens;
 		}
 
-		$url = add_query_arg( $query, $this->base() . $endpoint );
+		$url = add_query_arg( self::encode_query( $query ), $this->base() . $endpoint );
 
 		/*
 		 * Without cURL there is no way into the transfer while it runs, so the
@@ -316,6 +316,28 @@ class Api_Client {
 		}
 
 		Sse::end();
+	}
+
+	/**
+	 * Encodes query values for add_query_arg(), which leaves them as they are.
+	 *
+	 * Unencoded, a prompt breaks the URL it travels in: "?" and "&" cut it
+	 * short, and a "#" turns the rest into a fragment. The page text sent by
+	 * "summarise this page" regularly holds a "#" followed by a line break,
+	 * and a fragment with a line break is something the Requests library
+	 * refuses outright ("Cannot parse supplied IRI") -- the call never leaves
+	 * WordPress.
+	 *
+	 * @param array $query Query arguments.
+	 * @return array
+	 */
+	private static function encode_query( array $query ) {
+		return array_map(
+			static function ( $value ) {
+				return rawurlencode( (string) $value );
+			},
+			$query
+		);
 	}
 
 	/**
