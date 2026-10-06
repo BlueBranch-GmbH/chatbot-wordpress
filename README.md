@@ -15,6 +15,9 @@ WordPress spricht mit der API.
 > Wissensbasis, dieselbe API, dieselben CSS-Klassen. Eine Gestaltung, die für die eine Fassung
 > geschrieben wurde, passt auch auf die andere.
 
+
+> Stand der Entwicklung und offene ToDos: [docs/stand-und-todos.md](docs/stand-und-todos.md)
+
 ## So funktioniert die WordPress-Integration
 
 1. Erweiterung installieren und aktivieren
