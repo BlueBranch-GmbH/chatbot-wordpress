@@ -121,6 +121,14 @@ class Settings_Page {
 					'search_answer'   => __( 'Search results', 'bluebranch-chatbot' ),
 				),
 			),
+			'feedback'    => array(
+				'title'  => __( 'Questions & feedback', 'bluebranch-chatbot' ),
+				'intro'  => 'describe_feedback',
+				'fields' => array(
+					'answer_log'         => __( 'Saving', 'bluebranch-chatbot' ),
+					'log_retention_days' => __( 'Keep for', 'bluebranch-chatbot' ),
+				),
+			),
 			'content'     => array(
 				'title'  => __( 'Content', 'bluebranch-chatbot' ),
 				'intro'  => 'describe_content',
@@ -271,7 +279,10 @@ class Settings_Page {
 
 		$clean['sitemap_url'] = esc_url_raw( trim( (string) ( isset( $input['sitemap_url'] ) ? $input['sitemap_url'] : '' ) ) );
 
-		foreach ( array( 'hide_summarize', 'hide_disclaimer', 'widget_auto_display', 'unstyled', 'auto_train', 'purge_enabled', 'search_integration', 'debug_logging', 'strip_boilerplate', 'reconcile_sitemap' ) as $flag ) {
+		$retention                   = isset( $input['log_retention_days'] ) ? absint( $input['log_retention_days'] ) : $defaults['log_retention_days'];
+		$clean['log_retention_days'] = min( $retention, 3650 );
+
+		foreach ( array( 'hide_summarize', 'hide_disclaimer', 'widget_auto_display', 'unstyled', 'auto_train', 'purge_enabled', 'search_integration', 'debug_logging', 'strip_boilerplate', 'reconcile_sitemap', 'log_enabled', 'feedback_enabled' ) as $flag ) {
 			$clean[ $flag ] = ! empty( $input[ $flag ] );
 		}
 
@@ -370,6 +381,48 @@ class Settings_Page {
 		printf(
 			'<p>%s</p>',
 			esc_html__( 'Placed on a page it brings its own question field and answers below it. Above a set of search results it answers the term that was searched for instead, using the field the theme already has.', 'bluebranch-chatbot' )
+		);
+	}
+
+	/**
+	 * Introduces the questions and feedback section.
+	 *
+	 * @return void
+	 */
+	public function describe_feedback() {
+		printf(
+			'<p>%s</p>',
+			esc_html__( 'What visitors asked and how they rated the answers, kept on this site for later evaluation. No IP address, browser or user is stored; e-mail addresses, phone numbers and IBANs typed into a question or comment are masked. Feedback given while saving is off is still kept, together with its question and answer.', 'bluebranch-chatbot' )
+		);
+	}
+
+	/**
+	 * The saving and feedback switches.
+	 *
+	 * @return void
+	 */
+	public function field_answer_log() {
+		$this->checkbox_group(
+			array(
+				'log_enabled'      => __( 'Save questions and answers', 'bluebranch-chatbot' ),
+				'feedback_enabled' => __( 'Ask for feedback (thumbs up / down) under every answer', 'bluebranch-chatbot' ),
+			),
+			__( 'Applies to the chat widget and the search answer. Mention the evaluation in your privacy policy.', 'bluebranch-chatbot' )
+		);
+	}
+
+	/**
+	 * How long saved questions are kept.
+	 *
+	 * @return void
+	 */
+	public function field_log_retention_days() {
+		printf(
+			'<input type="number" min="0" max="3650" step="1" class="small-text" name="%1$s[log_retention_days]" value="%2$d"> %3$s<p class="description">%4$s</p>',
+			esc_attr( Options::SETTINGS ),
+			(int) Options::get( 'log_retention_days' ),
+			esc_html__( 'days', 'bluebranch-chatbot' ),
+			esc_html__( 'Older entries are deleted once a day. 0 keeps them indefinitely.', 'bluebranch-chatbot' )
 		);
 	}
 

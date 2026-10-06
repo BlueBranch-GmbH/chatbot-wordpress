@@ -4,7 +4,7 @@ Tags: ai, chatbot, search, assistant, gdpr
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,8 @@ This plugin relies on the BlueBranch Chatbot API at `https://api.chatbot.bluebra
 * *When a post is published or updated, and during a training run:* the post title, its URL, its content as Markdown, its meta description, a list of frequent words and the language of the site. The content is taken from the page as crawled, with headers, footers, menus, sidebars and repeated blocks removed. This happens only for posts of the types you selected, and only once you have stored an API key. Nothing is sent again while its content is unchanged.
 * *When a post stops being public, is deleted, or is excluded:* its identifier (`post_<ID>`), so the entry can be withdrawn.
 * *When a visitor asks a question:* the question itself and the language code. When the visitor uses the "summarise this page" button, the visible text of that page is sent with it. Chat mode additionally sends the last few messages of that visitor's own conversation so follow-up questions make sense.
+* *When additional content is saved or switched on:* its title, its text (for a file: the text extracted from it on your server -- never the file itself) and the language code, as `extra_<ID>` without an address. Switching it off or deleting it sends the identifier so it can be withdrawn.
+* *Saved questions and feedback* (if switched on) stay in your WordPress database and are not sent anywhere.
 * *On the admin screens:* requests to list, delete and count trained content, and to read the usage tier of your key.
 
 Requests are made by your server, not by the visitor's browser. The visitor's IP address is not forwarded to the API by this plugin.
@@ -144,6 +146,17 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.1.0 =
+* Questions and answers can be saved for evaluation (off by default), without IP address, browser or user; e-mail addresses, phone numbers and IBANs typed by visitors are masked. Retention in days, cleaned up daily.
+* Optional feedback under every answer: thumbs up or down, with a short comment field on thumbs down. Feedback is kept together with its question and answer even while saving is off.
+* New screen "Questions & feedback" with search, rating filter, bulk delete and CSV export.
+* Visitors can download their chat as a text or WebVTT file. The history keeps when each answer started and finished; the WebVTT file carries the wall-clock time per cue and plain text instead of markdown.
+* The chat history now survives page changes: it was stored under the element id, whose instance counter differs from page to page. Existing histories are taken over.
+* Additional content stays in step with the knowledge base: a file deleted from the media library is withdrawn at once, and an entry deleted under "Trained content" is deactivated instead of coming back with the next daily run.
+* Answers are kept in the chat history while they arrive, together with their sources and the feedback given, so a page change no longer loses them.
+* New screen "Additional content": notes and documents (TXT, MD, CSV, HTML, PDF, DOCX, ODT) without a page of their own. Files are converted to text on the site; only text is sent to the API, and such answers show no link.
+* Sources without an address are no longer listed under an answer.
+
 = 1.0.0 =
 * First release for WordPress, ported from the BlueBranch Chatbot extension for Contao.
 * Chat widget, ask field and search answer as blocks and as shortcodes.
@@ -158,6 +171,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Saving questions, feedback, chat export and additional content. Two new database tables are created on update.
 
 = 1.0.0 =
 First release.

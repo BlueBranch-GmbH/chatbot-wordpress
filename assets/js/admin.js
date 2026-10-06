@@ -482,8 +482,68 @@
 		} );
 	}
 
+	/* ---------------------------------------------------------------- *
+	 * Additional content screen: switch between text and file, file picker.
+	 * ---------------------------------------------------------------- */
+
+	function initExtra() {
+		var form = document.getElementById( 'bluebranch-chatbot-extra-form' );
+		var frame = null;
+		var picker;
+		var input;
+		var nameEl;
+
+		if ( ! form ) {
+			return;
+		}
+
+		function showKind() {
+			var checked = form.querySelector( 'input[name="kind"]:checked' );
+			var kind = checked ? checked.value : 'text';
+
+			Array.prototype.forEach.call( form.querySelectorAll( '[data-kind]' ), function ( row ) {
+				row.hidden = row.getAttribute( 'data-kind' ) !== kind;
+			} );
+		}
+
+		Array.prototype.forEach.call( form.querySelectorAll( 'input[name="kind"]' ), function ( radio ) {
+			radio.addEventListener( 'change', showKind );
+		} );
+
+		showKind();
+
+		picker = form.querySelector( '.bluebranch-chatbot-extra__select' );
+		input = form.querySelector( 'input[name="attachment_id"]' );
+		nameEl = form.querySelector( '.bluebranch-chatbot-extra__file' );
+
+		if ( ! picker || ! wp || ! wp.media ) {
+			return;
+		}
+
+		picker.addEventListener( 'click', function () {
+			if ( ! frame ) {
+				frame = wp.media( {
+					title: picker.textContent,
+					// Narrows the library view; the server checks the file again.
+					library: { type: config.extraMimeTypes || [] },
+					multiple: false
+				} );
+
+				frame.on( 'select', function () {
+					var attachment = frame.state().get( 'selection' ).first().toJSON();
+
+					input.value = attachment.id;
+					nameEl.textContent = attachment.filename || attachment.title || '';
+				} );
+			}
+
+			frame.open();
+		} );
+	}
+
 	function boot() {
 		initSettings();
+		initExtra();
 		initContent();
 		initTier();
 		initTraining();

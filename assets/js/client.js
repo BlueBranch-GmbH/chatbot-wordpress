@@ -131,6 +131,22 @@
 					}
 				};
 
+				// The reference an answer can be rated by. Sent just before the
+				// end, and only while feedback is switched on.
+				source.addEventListener( 'meta', function ( event ) {
+					var data;
+
+					try {
+						data = JSON.parse( event.data );
+					} catch ( error ) {
+						return;
+					}
+
+					if ( data && 'string' === typeof data.ref && /^[a-f0-9]{32}$/.test( data.ref ) && handlers.onMeta ) {
+						handlers.onMeta( data );
+					}
+				} );
+
 				source.addEventListener( 'end', function () {
 					finish( null );
 				} );
@@ -258,6 +274,220 @@
 	}
 
 	/**
+	 * Sends the rating of one answer.
+	 *
+	 * The answer itself is not sent: the server kept it under the reference,
+	 * so what ends up in the table is what was really answered and not what a
+	 * script claims was.
+	 *
+	 * @param {string} ref     Reference from the meta event.
+	 * @param {string} rating  Either "up" or "down".
+	 * @param {string} comment Optional text with a thumbs down.
+	 * @return {Promise} Resolves when the server has stored it.
+	 */
+	function sendFeedback( ref, rating, comment ) {
+		function post( force ) {
+			return getToken( force ).then( function ( token ) {
+				var body = { ref: ref, rating: rating, comment: comment || '' };
+
+				body[ TOKEN_PARAM ] = token;
+
+				return window.fetch( settings.restUrl + '/feedback', {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+					body: JSON.stringify( body )
+				} );
+			} );
+		}
+
+		return post( false ).then( function ( response ) {
+			// An aged-out token is replaced once, like on the answer routes.
+			return 403 === response.status ? post( true ) : response;
+		} ).then( function ( response ) {
+			if ( ! response.ok ) {
+				throw new Error( 'feedback failed' );
+			}
+
+			return true;
+		} );
+	}
+
+	/**
+	 * Puts thumbs up and down under an answer.
+	 *
+	 * A thumbs down opens a small field for what was wrong. Everything is
+	 * built with textContent: nothing typed here is ever read back as markup.
+	 *
+	 * @param {Element}  parent   Where the bar goes.
+	 * @param {string}   ref      Reference of the answer.
+	 * @param {string}   rating   Rating already given, if any.
+	 * @param {Function} onRated  Called with the rating once it is stored.
+	 * @return {Element} The bar.
+	 */
+	function renderFeedback( parent, ref, rating, onRated ) {
+		var doc = window.document;
+		var bar = doc.createElement( 'div' );
+		var question = doc.createElement( 'span' );
+		var up = doc.createElement( 'button' );
+		var down = doc.createElement( 'button' );
+		var status = doc.createElement( 'p' );
+		var form = null;
+
+		bar.className = 'chatbot-feedback';
+		question.className = 'chatbot-feedback__question';
+		question.textContent = strings.feedbackQuestion || 'Was this answer helpful?';
+
+		function button( element, kind, label, symbol ) {
+			element.type = 'button';
+			element.className = 'chatbot-feedback__btn chatbot-feedback__btn--' + kind;
+			element.setAttribute( 'aria-label', label );
+			element.setAttribute( 'title', label );
+			element.setAttribute( 'aria-pressed', kind === rating ? 'true' : 'false' );
+			element.textContent = symbol;
+		}
+
+		button( up, 'up', strings.feedbackUp || 'Helpful', '\uD83D\uDC4D' );
+		button( down, 'down', strings.feedbackDown || 'Not helpful', '\uD83D\uDC4E' );
+
+		status.className = 'chatbot-feedback__thanks';
+		status.setAttribute( 'role', 'status' );
+		status.hidden = true;
+
+		function showStatus( text ) {
+			status.textContent = text;
+			status.hidden = false;
+		}
+
+		function press( kind ) {
+			up.setAttribute( 'aria-pressed', 'up' === kind ? 'true' : 'false' );
+			down.setAttribute( 'aria-pressed', 'down' === kind ? 'true' : 'false' );
+		}
+
+		function removeForm() {
+			if ( form ) {
+				form.remove();
+				form = null;
+			}
+		}
+
+		function openForm() {
+			var label = doc.createElement( 'label' );
+			var field = doc.createElement( 'textarea' );
+			var hint = doc.createElement( 'span' );
+			var submit = doc.createElement( 'button' );
+			var fieldId = 'chatbot-feedback-' + ref;
+
+			removeForm();
+
+			form = doc.createElement( 'form' );
+			form.className = 'chatbot-feedback__form';
+
+			label.setAttribute( 'for', fieldId );
+			label.textContent = strings.feedbackCommentLabel || 'What was wrong with it?';
+
+			field.id = fieldId;
+			field.rows = 2;
+			field.maxLength = 1000;
+
+			hint.className = 'chatbot-feedback__hint';
+			hint.textContent = strings.feedbackCommentHint || '';
+
+			submit.type = 'submit';
+			submit.textContent = strings.feedbackSend || 'Send';
+
+			form.appendChild( label );
+			form.appendChild( field );
+			form.appendChild( hint );
+			form.appendChild( submit );
+
+			form.addEventListener( 'submit', function ( event ) {
+				var comment = field.value.trim();
+
+				event.preventDefault();
+
+				if ( '' === comment ) {
+					removeForm();
+					showStatus( strings.feedbackThanks || 'Thank you!' );
+
+					return;
+				}
+
+				submit.disabled = true;
+
+				sendFeedback( ref, 'down', comment ).then( function () {
+					removeForm();
+					showStatus( strings.feedbackThanks || 'Thank you!' );
+				} ).catch( function () {
+					submit.disabled = false;
+					showStatus( strings.feedbackError || 'Error' );
+				} );
+			} );
+
+			bar.appendChild( form );
+			field.focus();
+		}
+
+		function rate( kind ) {
+			up.disabled = true;
+			down.disabled = true;
+
+			sendFeedback( ref, kind, '' ).then( function () {
+				rating = kind;
+				press( kind );
+
+				if ( onRated ) {
+					onRated( kind );
+				}
+
+				if ( 'down' === kind ) {
+					status.hidden = true;
+					openForm();
+				} else {
+					removeForm();
+					showStatus( strings.feedbackThanks || 'Thank you!' );
+				}
+			} ).catch( function () {
+				showStatus( strings.feedbackError || 'Error' );
+			} ).then( function () {
+				up.disabled = false;
+				down.disabled = false;
+			} );
+		}
+
+		up.addEventListener( 'click', function () {
+			rate( 'up' );
+		} );
+
+		down.addEventListener( 'click', function () {
+			rate( 'down' );
+		} );
+
+		bar.appendChild( question );
+		bar.appendChild( up );
+		bar.appendChild( down );
+		bar.appendChild( status );
+		parent.appendChild( bar );
+
+		return bar;
+	}
+
+	/**
+	 * Only sources that can be linked to.
+	 *
+	 * A source without an address -- additional content added by hand -- has
+	 * nothing to offer a visitor, and its title may be an internal file name.
+	 *
+	 * @param {Array} sources Sources as the API sent them.
+	 * @return {Array} The ones with a safe address.
+	 */
+	function linkableSources( sources ) {
+		return ( Array.isArray( sources ) ? sources : [] ).filter( function ( source ) {
+			return source && '' !== safeUrl( source.url );
+		} );
+	}
+
+	/**
 	 * Reads the configuration a template left on an element.
 	 *
 	 * @param {Element} element The element carrying data-bb-config.
@@ -277,6 +507,9 @@
 		getToken: getToken,
 		stream: stream,
 		readConfig: readConfig,
-		buildSourceLink: buildSourceLink
+		buildSourceLink: buildSourceLink,
+		sendFeedback: sendFeedback,
+		renderFeedback: renderFeedback,
+		linkableSources: linkableSources
 	};
 }( window ) );

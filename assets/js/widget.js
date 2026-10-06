@@ -23,8 +23,18 @@
 		this.input = container.querySelector( '.chatbot-widget__input' );
 		this.sendButton = container.querySelector( '.chatbot-widget__send' );
 		this.badge = container.querySelector( '.chatbot-widget__badge' );
+		this.exportButton = container.querySelector( '.chatbot-widget__export' );
+		this.exportMenu = container.querySelector( '.chatbot-widget__export-menu' );
+		this.titleEl = container.querySelector( '.chatbot-widget__header-title' );
 
-		this.storageKey = 'bluebranch_chatbot_history_' + container.id;
+		/*
+		 * One history per site, not per element id. The id carries an instance
+		 * counter that differs from page to page (a search block before the
+		 * widget makes it -2), so keying on it made the chat look empty after
+		 * every page change. A shortcode may still ask for its own history via
+		 * data-bb-history.
+		 */
+		this.storageKey = 'bluebranch_chatbot_history' + ( container.getAttribute( 'data-bb-history' ) ? '_' + container.getAttribute( 'data-bb-history' ) : '' );
 		this.fontStorageKey = 'bluebranch_chatbot_font_size';
 		this.fontSizeSteps = [ 13, 14, 15, 16, 17, 18, 19, 20 ];
 
@@ -110,7 +120,63 @@
 			self.autoGrow();
 		} );
 
+		this.initExport();
+
 		this.renderSuggestions();
+	};
+
+	/**
+	 * Takes over a history stored under the old per-element keys (1.0.x), the
+	 * most recently written one, and removes the old keys.
+	 *
+	 * @return {string|null} The raw history, or null.
+	 */
+	ChatbotWidget.prototype.adoptLegacyHistory = function () {
+		var prefix = 'bluebranch_chatbot_history_bluebranch-chatbot-widget-';
+		var best = null;
+		var bestTime = -1;
+		var legacy = [];
+		var i;
+		var key;
+
+		for ( i = 0; i < window.localStorage.length; i++ ) {
+			key = window.localStorage.key( i );
+
+			if ( key && 0 === key.indexOf( prefix ) ) {
+				legacy.push( key );
+			}
+		}
+
+		legacy.forEach( function ( legacyKey ) {
+			var raw = window.localStorage.getItem( legacyKey );
+			var entries;
+			var time = 0;
+
+			try {
+				entries = JSON.parse( raw );
+			} catch ( error ) {
+				entries = null;
+			}
+
+			if ( Array.isArray( entries ) && entries.length ) {
+				time = entries[ entries.length - 1 ].time || 0;
+
+				if ( time > bestTime ) {
+					bestTime = time;
+					best = raw;
+				}
+			}
+		} );
+
+		if ( best ) {
+			window.localStorage.setItem( this.storageKey, best );
+		}
+
+		legacy.forEach( function ( legacyKey ) {
+			window.localStorage.removeItem( legacyKey );
+		} );
+
+		return best;
 	};
 
 	ChatbotWidget.prototype.loadHistory = function () {
@@ -119,7 +185,7 @@
 		var stored;
 
 		try {
-			raw = window.localStorage.getItem( this.storageKey );
+			raw = window.localStorage.getItem( this.storageKey ) || this.adoptLegacyHistory();
 		} catch ( error ) {
 			// localStorage unavailable (private mode, quota, ...) - start fresh.
 			return;
@@ -145,12 +211,53 @@
 			}
 
 			self.history.push( entry );
-			self.addMessage( entry.role, entry.content );
+			self.renderEntry( entry );
 		} );
 
 		if ( this.history.length > 0 ) {
 			this.hasGreeted = true;
 		}
+	};
+
+	/**
+	 * Draws one stored message with everything that belonged to it: the
+	 * sources, the feedback given and -- for an answer the page was left in
+	 * the middle of -- a note that it is incomplete.
+	 */
+	ChatbotWidget.prototype.renderEntry = function ( entry ) {
+		var bubble = this.addMessage( entry.role, entry.content );
+		var note;
+
+		if ( 'bot' !== entry.role ) {
+			return;
+		}
+
+		if ( entry.pending ) {
+			note = document.createElement( 'p' );
+			note.className = 'chatbot-widget__interrupted';
+			note.textContent = this.strings.interrupted;
+			bubble.appendChild( note );
+		}
+
+		if ( Array.isArray( entry.sources ) && entry.sources.length ) {
+			this.appendSources( bubble, entry.sources );
+		}
+
+		if ( entry.ref && client.settings.feedback ) {
+			this.addFeedback( bubble, entry );
+		}
+	};
+
+	/**
+	 * Puts the thumbs under an answer and remembers what was chosen.
+	 */
+	ChatbotWidget.prototype.addFeedback = function ( bubble, entry ) {
+		var self = this;
+
+		client.renderFeedback( bubble.parentNode, entry.ref, entry.rating || '', function ( rating ) {
+			entry.rating = rating;
+			self.saveHistory();
+		} );
 	};
 
 	ChatbotWidget.prototype.saveHistory = function () {
@@ -277,7 +384,7 @@
 		window.setTimeout( function () {
 			typingRow.remove();
 			self.addMessage( 'bot', self.greeting );
-			self.history.push( { role: 'bot', content: self.greeting } );
+			self.history.push( { role: 'bot', content: self.greeting, time: Date.now() } );
 			self.saveHistory();
 		}, 800 );
 	};
@@ -395,7 +502,7 @@
 		}
 
 		this.addMessage( 'user', text );
-		this.history.push( { role: 'user', content: text } );
+		this.history.push( { role: 'user', content: text, time: Date.now() } );
 		this.saveHistory();
 
 		this.requestAnswer( text, true );
@@ -415,10 +522,10 @@
 			: this.strings.summarizeFallbackPrompt;
 
 		this.addMessage( 'user', displayText );
-		this.history.push( { role: 'user', content: displayText } );
+		this.history.push( { role: 'user', content: displayText, time: Date.now() } );
 		this.saveHistory();
 
-		this.requestAnswer( prompt, false );
+		this.requestAnswer( prompt, false, true );
 	};
 
 	ChatbotWidget.prototype.extractPageContent = function () {
@@ -485,25 +592,69 @@
 		} ).join( '\n' );
 	};
 
-	ChatbotWidget.prototype.requestAnswer = function ( prompt, includeContext ) {
+	ChatbotWidget.prototype.requestAnswer = function ( prompt, includeContext, summarize ) {
 		var self = this;
 		var typingRow = this.addTyping();
 		var bubble = null;
 		var fullAnswer = '';
 		var renderPending = false;
 		var chatContext = includeContext ? this.buildChatContext() : '';
+		var entry = null;
+		var ref = '';
+		var lastSave = 0;
 
 		this.setBusy( true );
 		this.pendingSources = null;
 
-		function done() {
+		/*
+		 * The answer goes into the stored history while it is still arriving,
+		 * marked as pending. Leaving the page halfway used to lose it entirely:
+		 * only the question was stored, the answer only once it was complete.
+		 */
+		function keep( final ) {
+			var now = Date.now();
+
+			if ( ! fullAnswer ) {
+				return;
+			}
+
+			if ( ! entry ) {
+				entry = { role: 'bot', content: '', time: now, pending: true };
+				self.history.push( entry );
+			}
+
+			entry.content = fullAnswer;
+
+			if ( final ) {
+				delete entry.pending;
+			}
+
+			// Throttled while streaming: writing localStorage on every chunk
+			// would cost more than the rendering does.
+			if ( final || now - lastSave > 500 ) {
+				lastSave = now;
+				self.saveHistory();
+			}
+		}
+
+		function done( complete ) {
 			self.abortRequest = null;
 			self.setBusy( false );
 			self.input.focus();
 
 			if ( fullAnswer ) {
-				self.history.push( { role: 'bot', content: fullAnswer } );
-				self.saveHistory();
+				if ( entry ) {
+					// When the answer was finished, for how long the subtitle export shows it.
+					entry.end = Date.now();
+				}
+
+				keep( true );
+
+				if ( ! complete && entry ) {
+					// Stopped or broken off: the text stays, but is marked.
+					entry.pending = true;
+					self.saveHistory();
+				}
 
 				if ( ! self.isOpen ) {
 					self.setUnread( true );
@@ -513,7 +664,10 @@
 
 		var connection = client.stream( '/chat/stream', {
 			prompt: prompt,
-			chat_context: chatContext
+			chat_context: chatContext,
+			source: 'widget',
+			post_id: client.settings.postId || 0,
+			summarize: summarize ? 1 : 0
 		}, {
 			onAnswer: function ( chunk ) {
 				if ( ! bubble ) {
@@ -522,6 +676,7 @@
 				}
 
 				fullAnswer += chunk;
+				keep( false );
 
 				// Throttled to animation frames so the browser paints each
 				// chunk instead of batching everything that arrives in one tick.
@@ -538,16 +693,37 @@
 			onSources: function ( sources ) {
 				self.pendingSources = sources;
 			},
+			onMeta: function ( meta ) {
+				ref = meta.ref;
+			},
 			onEnd: function () {
+				var sources = client.linkableSources( self.pendingSources );
+
+				self.pendingSources = null;
+
 				if ( ! bubble ) {
 					typingRow.remove();
 					self.addMessage( 'bot', self.strings.noAnswer );
-				} else if ( self.pendingSources ) {
-					self.appendSources( bubble, self.pendingSources );
-					self.pendingSources = null;
+					done( false );
+
+					return;
 				}
 
-				done();
+				keep( true );
+
+				if ( sources.length ) {
+					entry.sources = sources.slice( 0, 3 ).map( function ( source ) {
+						return { title: source.title || '', url: source.url };
+					} );
+					self.appendSources( bubble, entry.sources );
+				}
+
+				if ( ref && client.settings.feedback ) {
+					entry.ref = ref;
+					self.addFeedback( bubble, entry );
+				}
+
+				done( true );
 			},
 			onError: function ( message ) {
 				if ( ! bubble ) {
@@ -555,7 +731,7 @@
 					self.addMessage( 'bot', message || self.strings.requestError );
 				}
 
-				done();
+				done( false );
 			}
 		} );
 
@@ -569,29 +745,258 @@
 				self.addMessage( 'bot', self.strings.stopped );
 			}
 
-			done();
+			done( false );
 		};
 	};
 
 	ChatbotWidget.prototype.appendSources = function ( bubble, sources ) {
 		var self = this;
 		var list = document.createElement( 'ul' );
+		var linkable = client.linkableSources( sources );
+
+		// Sources without an address are not shown at all; see linkableSources().
+		if ( ! linkable.length ) {
+			return;
+		}
 
 		list.className = 'chatbot-widget__sources';
 
-		sources.slice( 0, 3 ).forEach( function ( source ) {
+		linkable.slice( 0, 3 ).forEach( function ( source ) {
 			var item = document.createElement( 'li' );
 
-			if ( source.url ) {
-				item.appendChild( client.buildSourceLink( source, self.strings ) );
-			} else {
-				item.textContent = source.title || self.strings.source;
-			}
-
+			item.appendChild( client.buildSourceLink( source, self.strings ) );
 			list.appendChild( item );
 		} );
 
 		bubble.appendChild( list );
+	};
+
+	/**
+	 * Wires the export button and its two formats.
+	 */
+	ChatbotWidget.prototype.initExport = function () {
+		var self = this;
+
+		if ( ! this.exportButton || ! this.exportMenu ) {
+			return;
+		}
+
+		function setMenu( open ) {
+			self.exportMenu.hidden = ! open;
+			self.exportButton.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		}
+
+		this.exportButton.addEventListener( 'click', function () {
+			setMenu( self.exportMenu.hidden );
+		} );
+
+		Array.prototype.forEach.call( this.exportMenu.querySelectorAll( 'button[data-format]' ), function ( button ) {
+			button.addEventListener( 'click', function () {
+				setMenu( false );
+				self.exportChat( button.getAttribute( 'data-format' ) );
+			} );
+		} );
+
+		this.container.addEventListener( 'keydown', function ( event ) {
+			if ( 'Escape' === event.key && ! self.exportMenu.hidden ) {
+				setMenu( false );
+				self.exportButton.focus();
+			}
+		} );
+	};
+
+	/**
+	 * Hands the conversation to the visitor as a file.
+	 *
+	 * Built entirely in the browser: the conversation is already here, and
+	 * sending it to the server just to have it sent back would be one more
+	 * place it passes through.
+	 *
+	 * @param {string} format Either "txt" or "vtt".
+	 */
+	ChatbotWidget.prototype.exportChat = function ( format ) {
+		var entries = this.history.filter( function ( entry ) {
+			return entry && 'string' === typeof entry.content && '' !== entry.content;
+		} );
+		var botName = this.titleEl ? this.titleEl.textContent.trim() : 'Chatbot';
+		var content;
+		var url;
+		var link = document.createElement( 'a' );
+		var stamp = new Date().toISOString().slice( 0, 10 );
+
+		if ( ! entries.length ) {
+			return;
+		}
+
+		content = 'vtt' === format ? this.toVtt( entries, botName ) : this.toTxt( entries, botName );
+		url = window.URL.createObjectURL(
+			new window.Blob( [ content ], { type: ( 'vtt' === format ? 'text/vtt' : 'text/plain' ) + ';charset=utf-8' } )
+		);
+
+		link.href = url;
+		link.download = 'chat-' + stamp + '.' + ( 'vtt' === format ? 'vtt' : 'txt' );
+		document.body.appendChild( link );
+		link.click();
+		link.remove();
+
+		window.setTimeout( function () {
+			window.URL.revokeObjectURL( url );
+		}, 1000 );
+	};
+
+	ChatbotWidget.prototype.speaker = function ( entry, botName ) {
+		return 'user' === entry.role ? this.strings.you : botName;
+	};
+
+	function pad( value, length ) {
+		return String( value ).padStart( length || 2, '0' );
+	}
+
+	function clockOf( ms ) {
+		var date = new Date( ms );
+
+		return pad( date.getHours() ) + ':' + pad( date.getMinutes() ) + ':' + pad( date.getSeconds() );
+	}
+
+	/**
+	 * The start of every entry in ms, ascending.
+	 *
+	 * Entries without a timestamp (histories from 1.0.x, the greeting among
+	 * them) are bridged one by one, a second from their neighbour. Giving up
+	 * on the timing of the whole file because the first entry has none -- as
+	 * the first version did -- put every cue on a five-second grid.
+	 *
+	 * @param {Array} entries History entries.
+	 * @return {number[]} Start times.
+	 */
+	function startTimes( entries ) {
+		var valid = function ( entry ) {
+			return entry && 'number' === typeof entry.time && entry.time > 0;
+		};
+		var firstTimed = -1;
+		var anchor;
+		var times = [];
+		var i;
+
+		for ( i = 0; i < entries.length; i++ ) {
+			if ( valid( entries[ i ] ) ) {
+				firstTimed = i;
+				break;
+			}
+		}
+
+		anchor = -1 === firstTimed ? Date.now() : entries[ firstTimed ].time;
+
+		entries.forEach( function ( entry, index ) {
+			var previous = index > 0 ? times[ index - 1 ] : null;
+
+			if ( -1 === firstTimed || index < firstTimed ) {
+				times.push( anchor - ( ( -1 === firstTimed ? entries.length : firstTimed ) - index ) * 1000 );
+				return;
+			}
+
+			times.push( valid( entry ) && ( null === previous || entry.time >= previous ) ? entry.time : previous + 1000 );
+		} );
+
+		return times;
+	}
+
+	/**
+	 * How long a cue stays: until the answer was finished plus reading time
+	 * (50 ms a character, 2 to 20 seconds), but never past the next message --
+	 * players stack overlapping cues on top of each other.
+	 *
+	 * @param {Array}    entries History entries.
+	 * @param {number[]} times   Start times.
+	 * @return {number[]} End times.
+	 */
+	function endTimes( entries, times ) {
+		return entries.map( function ( entry, index ) {
+			var shown = 'number' === typeof entry.end && entry.end >= times[ index ] ? entry.end : times[ index ];
+			var end = shown + Math.min( 20000, Math.max( 2000, entry.content.length * 50 ) );
+
+			if ( index + 1 < times.length && times[ index + 1 ] < end ) {
+				end = times[ index + 1 ];
+			}
+
+			return Math.max( end, times[ index ] + 500 );
+		} );
+	}
+
+	/**
+	 * The markdown of an answer as readable text: links as "text (url)",
+	 * emphasis, heading and code marks removed, list items with "- ".
+	 *
+	 * @param {string} text Markdown.
+	 * @return {string} Plain text.
+	 */
+	function plainText( text ) {
+		return String( text )
+			.replace( /```[a-z]*\n?/gi, '' )
+			.replace( /!\[([^\]]*)\]\([^)]*\)/g, '$1' )
+			.replace( /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g, '$1 ($2)' )
+			.replace( /(\*\*|__)(.+?)\1/g, '$2' )
+			.replace( /(^|[^*\w])[*_]([^*_\n]+)[*_](?=[^*\w]|$)/g, '$1$2' )
+			.replace( /`([^`]+)`/g, '$1' )
+			.replace( /^\s{0,3}#{1,6}\s+/gm, '' )
+			.replace( /^\s*[*+]\s+/gm, '- ' )
+			.replace( /^\s{0,3}>\s?/gm, '' );
+	}
+
+	ChatbotWidget.prototype.toTxt = function ( entries, botName ) {
+		var self = this;
+		var times = startTimes( entries );
+		var lines = [ document.title + ' – ' + new Date( times[ 0 ] ).toLocaleString(), '' ];
+
+		entries.forEach( function ( entry, index ) {
+			lines.push( '[' + clockOf( times[ index ] ) + '] ' + self.speaker( entry, botName ) + ': ' + plainText( entry.content ).trim() );
+			lines.push( '' );
+		} );
+
+		return lines.join( '\r\n' );
+	};
+
+	/**
+	 * WebVTT: one cue per message on a timeline from the start of the chat,
+	 * as subtitles require. The wall-clock time is the cue identifier, the
+	 * date sits in a NOTE at the top.
+	 *
+	 * Cue text must not contain "-->" or an empty line (either ends the cue
+	 * early), and < and & are markup there.
+	 */
+	ChatbotWidget.prototype.toVtt = function ( entries, botName ) {
+		var self = this;
+		var times = startTimes( entries );
+		var ends = endTimes( entries, times );
+		var origin = times[ 0 ];
+		var out = [ 'WEBVTT', '', 'NOTE ' + ( document.title + ' – ' + new Date( origin ).toLocaleString() ).replace( /-->/g, '→' ), '' ];
+
+		function stamp( ms ) {
+			var hours = Math.floor( ms / 3600000 );
+			var minutes = Math.floor( ( ms % 3600000 ) / 60000 );
+			var seconds = Math.floor( ( ms % 60000 ) / 1000 );
+
+			return pad( hours ) + ':' + pad( minutes ) + ':' + pad( seconds ) + '.' + pad( ms % 1000, 3 );
+		}
+
+		function clean( text ) {
+			return String( text )
+				.replace( /&/g, '&amp;' )
+				.replace( /</g, '&lt;' )
+				.replace( />/g, '&gt;' )
+				.replace( /\r\n?/g, '\n' )
+				.replace( /\n\s*\n+/g, '\n' )
+				.trim();
+		}
+
+		entries.forEach( function ( entry, index ) {
+			out.push( ( index + 1 ) + ' ' + clockOf( times[ index ] ) );
+			out.push( stamp( times[ index ] - origin ) + ' --> ' + stamp( ends[ index ] - origin ) );
+			out.push( '<v ' + clean( self.speaker( entry, botName ) ).replace( /\n/g, ' ' ) + '>' + clean( plainText( entry.content ) ) );
+			out.push( '' );
+		} );
+
+		return out.join( '\n' );
 	};
 
 	ChatbotWidget.prototype.scrollToBottom = function () {

@@ -104,8 +104,12 @@ class Frontend {
 		);
 
 		$settings = array(
-			'restUrl' => esc_url_raw( rest_url( Rest_Controller::REST_NAMESPACE ) ),
-			'strings' => self::strings(),
+			'restUrl'  => esc_url_raw( rest_url( Rest_Controller::REST_NAMESPACE ) ),
+			'strings'  => self::strings(),
+			'feedback' => Answer_Log::feedback_enabled(),
+			// Which page the question was asked on, for the evaluation. Not
+			// the visitor: a post id says nothing about who was reading it.
+			'postId'   => is_admin() ? 0 : (int) get_queried_object_id(),
 		);
 
 		wp_localize_script( 'bluebranch-chatbot-client', 'bluebranchChatbotSettings', $settings );
@@ -136,6 +140,19 @@ class Frontend {
 			'generated'               => __( 'Answer generated', 'bluebranch-chatbot' ),
 			/* translators: %s: elapsed time, for example "2:30 seconds". */
 			'elapsed'                 => __( '%s seconds', 'bluebranch-chatbot' ),
+			'feedbackQuestion'        => __( 'Was this answer helpful?', 'bluebranch-chatbot' ),
+			'feedbackUp'              => __( 'Yes, helpful', 'bluebranch-chatbot' ),
+			'feedbackDown'            => __( 'No, not helpful', 'bluebranch-chatbot' ),
+			'feedbackCommentLabel'    => __( 'What was wrong with it? (optional)', 'bluebranch-chatbot' ),
+			'feedbackCommentHint'     => __( 'Please do not enter any personal data.', 'bluebranch-chatbot' ),
+			'feedbackSend'            => __( 'Send', 'bluebranch-chatbot' ),
+			'feedbackThanks'          => __( 'Thank you for your feedback!', 'bluebranch-chatbot' ),
+			'feedbackError'           => __( 'The feedback could not be sent.', 'bluebranch-chatbot' ),
+			'interrupted'             => __( 'Answer interrupted.', 'bluebranch-chatbot' ),
+			'export'                  => __( 'Export the chat', 'bluebranch-chatbot' ),
+			'exportTxt'               => __( 'As text (.txt)', 'bluebranch-chatbot' ),
+			'exportVtt'               => __( 'As WebVTT (.vtt)', 'bluebranch-chatbot' ),
+			'you'                     => __( 'You', 'bluebranch-chatbot' ),
 		);
 	}
 

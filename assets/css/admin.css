@@ -305,3 +305,42 @@
 .bluebranch-chatbot-admin--settings .bluebranch-chatbot-tier {
 	margin: 12px 0 0;
 }
+
+/* Additional content */
+.bluebranch-chatbot-extra__card {
+	max-width: 900px;
+}
+
+.bluebranch-chatbot-extra__file {
+	margin-left: 8px;
+}
+
+.bluebranch-chatbot-extra__table {
+	margin-top: 12px;
+}
+
+.bluebranch-chatbot-danger {
+	color: #b32d2e;
+}
+
+/* Questions & feedback */
+.bluebranch-chatbot-admin--log .column-created_at {
+	width: 130px;
+}
+
+.bluebranch-chatbot-admin--log .column-rating {
+	width: 70px;
+}
+
+.bluebranch-chatbot-admin--log .column-source {
+	width: 160px;
+}
+
+.bluebranch-chatbot-admin--log details summary {
+	cursor: pointer;
+}
+
+.bluebranch-chatbot-log__full {
+	margin-top: 6px;
+	white-space: normal;
+}

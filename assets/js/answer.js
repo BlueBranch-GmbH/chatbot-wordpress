@@ -182,6 +182,7 @@
 		var self = this;
 		var fullAnswer = '';
 		var renderPending = false;
+		var ref = '';
 
 		if ( this.busy ) {
 			return;
@@ -202,7 +203,13 @@
 
 		this.startTimer();
 
-		this.activeStream = client.stream( '/generate/stream', { prompt: question }, {
+		this.activeStream = client.stream( '/generate/stream', {
+			prompt: question,
+			// With a field of its own it is the ask module; without, it sits
+			// above the theme's search results.
+			source: this.form ? 'ask' : 'search',
+			post_id: client.settings.postId || 0
+		}, {
 			onAnswer: function ( chunk ) {
 				fullAnswer += chunk;
 				self.answered = true;
@@ -222,6 +229,9 @@
 			onSources: function ( sources ) {
 				self.renderSources( sources );
 			},
+			onMeta: function ( meta ) {
+				ref = meta.ref;
+			},
 			onEnd: function () {
 				self.activeStream = null;
 				self.stopTimer();
@@ -229,6 +239,12 @@
 
 				if ( '' === fullAnswer && self.contentEl ) {
 					self.contentEl.textContent = self.strings.noAnswer;
+
+					return;
+				}
+
+				if ( ref && client.settings.feedback && self.response ) {
+					self.feedbackEl = client.renderFeedback( self.response, ref, '', null );
 				}
 			},
 			onError: function ( message ) {
@@ -249,6 +265,11 @@
 	};
 
 	ChatbotAnswer.prototype.reset = function () {
+		if ( this.feedbackEl ) {
+			this.feedbackEl.remove();
+			this.feedbackEl = null;
+		}
+
 		if ( this.contentEl ) {
 			this.contentEl.innerHTML = '';
 		}
@@ -271,19 +292,17 @@
 
 		this.sourcesList.innerHTML = '';
 
+		// Sources without an address are not shown; see linkableSources().
+		sources = client.linkableSources( sources );
+
 		sources.slice( 0, 3 ).forEach( function ( source ) {
 			var item = document.createElement( 'li' );
 
-			if ( source.url ) {
-				item.appendChild( client.buildSourceLink( source, self.strings ) );
-			} else {
-				item.textContent = source.title || self.strings.source;
-			}
-
+			item.appendChild( client.buildSourceLink( source, self.strings ) );
 			self.sourcesList.appendChild( item );
 		} );
 
-		this.sourcesEl.hidden = false;
+		this.sourcesEl.hidden = 0 === sources.length;
 	};
 
 	ChatbotAnswer.prototype.startTimer = function () {

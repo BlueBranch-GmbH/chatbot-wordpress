@@ -56,6 +56,16 @@ $bluebranch_chatbot_config = array(
 						aria-label="<?php esc_attr_e( 'Decrease font size', 'bluebranch-chatbot' ); ?>"
 						title="<?php esc_attr_e( 'Decrease font size', 'bluebranch-chatbot' ); ?>">A</button>
 				</div>
+				<div class="chatbot-widget__export-wrap">
+					<button type="button" class="chatbot-widget__export" aria-haspopup="true" aria-expanded="false"
+						aria-controls="<?php echo esc_attr( $args['id'] ); ?>-export-menu"
+						aria-label="<?php esc_attr_e( 'Export the chat', 'bluebranch-chatbot' ); ?>"
+						title="<?php esc_attr_e( 'Export the chat', 'bluebranch-chatbot' ); ?>">&#10515;</button>
+					<div class="chatbot-widget__export-menu" id="<?php echo esc_attr( $args['id'] ); ?>-export-menu" hidden>
+						<button type="button" data-format="txt"><?php esc_html_e( 'As text (.txt)', 'bluebranch-chatbot' ); ?></button>
+						<button type="button" data-format="vtt"><?php esc_html_e( 'As WebVTT (.vtt)', 'bluebranch-chatbot' ); ?></button>
+					</div>
+				</div>
 				<button type="button" class="chatbot-widget__clear"
 					aria-label="<?php esc_attr_e( 'Clear the chat', 'bluebranch-chatbot' ); ?>"
 					title="<?php esc_attr_e( 'Clear the chat', 'bluebranch-chatbot' ); ?>">&#8635;</button>

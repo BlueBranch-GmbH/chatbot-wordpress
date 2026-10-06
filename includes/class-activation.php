@@ -29,6 +29,7 @@ class Activation {
 			add_option( Options::SETTINGS, Options::defaults() );
 		}
 
+		Schema::install();
 		Cron::schedule_events();
 	}
 

@@ -26,7 +26,7 @@ class Sse {
 	 *
 	 * @var string[]
 	 */
-	private static $allowed_events = array( 'error', 'end', 'sources' );
+	private static $allowed_events = array( 'error', 'end', 'sources', 'meta' );
 
 	/**
 	 * Sends the headers and dismantles every output buffer.

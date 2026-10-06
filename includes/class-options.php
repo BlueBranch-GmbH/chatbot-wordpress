@@ -69,6 +69,9 @@ class Options {
 			'purge_interval'      => 'daily',
 			'search_integration'  => false,
 			'debug_logging'       => false,
+			'log_enabled'         => false,
+			'log_retention_days'  => 180,
+			'feedback_enabled'    => false,
 		);
 	}
 

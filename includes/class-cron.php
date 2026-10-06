@@ -31,6 +31,12 @@ class Cron {
 	const EVENT_PURGE = 'bluebranch_chatbot_purge';
 
 	/**
+	 * The daily housekeeping: retention of saved questions, changed files of
+	 * the additional content.
+	 */
+	const EVENT_MAINTENANCE = 'bluebranch_chatbot_maintenance';
+
+	/**
 	 * Schedule WordPress does not ship with.
 	 */
 	const SCHEDULE_SIX_HOURS = 'bluebranch_chatbot_six_hours';
@@ -55,6 +61,8 @@ class Cron {
 	public function register() {
 		add_filter( 'cron_schedules', array( $this, 'add_schedules' ) );
 		add_action( self::EVENT_PURGE, array( $this, 'purge' ) );
+		add_action( self::EVENT_MAINTENANCE, array( $this, 'maintenance' ) );
+		add_action( 'delete_attachment', array( Extra_Content::class, 'on_delete_attachment' ) );
 		add_action( 'update_option_' . Options::SETTINGS, array( $this, 'on_settings_saved' ) );
 	}
 
@@ -111,6 +119,10 @@ class Cron {
 	 * @return void
 	 */
 	public static function schedule_events() {
+		if ( ! wp_next_scheduled( self::EVENT_MAINTENANCE ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::EVENT_MAINTENANCE );
+		}
+
 		$wanted    = self::schedule_name( Options::get( 'purge_interval' ) );
 		$enabled   = (bool) Options::get( 'purge_enabled' );
 		$scheduled = wp_get_scheduled_event( self::EVENT_PURGE );
@@ -135,8 +147,24 @@ class Cron {
 	 */
 	public static function clear_events() {
 		wp_clear_scheduled_hook( self::EVENT_PURGE );
+		wp_clear_scheduled_hook( self::EVENT_MAINTENANCE );
 		wp_clear_scheduled_hook( Indexer::EVENT_TRAIN );
 		wp_clear_scheduled_hook( Indexer::EVENT_DELETE );
+	}
+
+	/**
+	 * Deletes saved questions past their retention and retrains changed files.
+	 *
+	 * @return void
+	 */
+	public function maintenance() {
+		$removed = Answer_Log::purge_expired();
+
+		if ( $removed > 0 ) {
+			Logger::debug( sprintf( 'Removed %d saved questions past their retention.', $removed ) );
+		}
+
+		Extra_Content::refresh_changed();
 	}
 
 	/**

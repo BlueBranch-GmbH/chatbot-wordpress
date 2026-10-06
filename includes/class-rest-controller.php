@@ -72,6 +72,19 @@ class Rest_Controller {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
+			'source'            => array(
+				'type' => 'string',
+				'enum' => Answer_Log::$sources,
+			),
+			'post_id'           => array(
+				'type'              => 'integer',
+				'default'           => 0,
+				'sanitize_callback' => 'absint',
+			),
+			'summarize'         => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
 		);
 
 		/*
@@ -119,6 +132,36 @@ class Rest_Controller {
 				'callback'            => array( $this, 'generate_search' ),
 				'permission_callback' => '__return_true',
 				'args'                => $prompt_args,
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/feedback',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'save_feedback' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'ref'               => array(
+						'required' => true,
+						'type'     => 'string',
+						'pattern'  => '^[a-f0-9]{32}$',
+					),
+					'rating'            => array(
+						'required' => true,
+						'type'     => 'string',
+						'enum'     => array( 'up', 'down' ),
+					),
+					'comment'           => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					Answer_Token::PARAM => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 
@@ -348,6 +391,7 @@ class Rest_Controller {
 			'prompt'       => (string) $request->get_param( 'prompt' ),
 			'language'     => $this->request_language( $request ),
 			'chat_context' => (string) $request->get_param( 'chat_context' ),
+			'log'          => $this->log_context( $request, 'chat' === $mode ? 'widget' : 'search' ),
 		);
 
 		$client = new Api_Client();
@@ -359,6 +403,64 @@ class Rest_Controller {
 		}
 
 		exit;
+	}
+
+	/**
+	 * What is kept with an answer besides question and reply.
+	 *
+	 * @param WP_REST_Request $request  The request.
+	 * @param string          $fallback Source assumed when the script sent none.
+	 * @return array
+	 */
+	private function log_context( WP_REST_Request $request, $fallback ) {
+		$source = (string) $request->get_param( 'source' );
+
+		return array(
+			'source'    => in_array( $source, Answer_Log::$sources, true ) ? $source : $fallback,
+			'post_id'   => absint( $request->get_param( 'post_id' ) ),
+			'summarize' => (bool) $request->get_param( 'summarize' ),
+		);
+	}
+
+	/**
+	 * Stores a visitor's rating of an answer.
+	 *
+	 * Guarded like the answer routes: the token shows the request came from a
+	 * page of this site, the counter keeps one client from flooding the table.
+	 * The reference itself is what limits the feedback to answers this
+	 * browser was actually given.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_feedback( WP_REST_Request $request ) {
+		if ( ! Answer_Token::verify( $request->get_param( Answer_Token::PARAM ) ) ) {
+			return new WP_Error(
+				'bluebranch_chatbot_token',
+				__( 'Your session has expired. Please reload the page and try again.', 'bluebranch-chatbot' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! Answer_Log::feedback_enabled() ) {
+			return new WP_Error( 'bluebranch_chatbot_feedback_off', __( 'Feedback is switched off.', 'bluebranch-chatbot' ), array( 'status' => 403 ) );
+		}
+
+		if ( ! Rate_Limiter::allow( 'feedback', 20, MINUTE_IN_SECONDS ) ) {
+			return new WP_Error( 'bluebranch_chatbot_rate_limit', __( 'Too many requests.', 'bluebranch-chatbot' ), array( 'status' => 429 ) );
+		}
+
+		$result = Answer_Log::feedback(
+			(string) $request->get_param( 'ref' ),
+			(string) $request->get_param( 'rating' ),
+			(string) $request->get_param( 'comment' )
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( array( 'success' => true ) );
 	}
 
 	/**
@@ -442,6 +544,12 @@ class Rest_Controller {
 			delete_post_meta( (int) $matches[1], Indexer::META_TRAINED );
 		}
 
+		// Additional content removed here comes back with the next daily run
+		// unless it is switched off on its own screen.
+		if ( preg_match( '/^' . Extra_Content::EXTERNAL_PREFIX . '(\d+)$/', $external_id, $matches ) ) {
+			Extra_Content::mark_pending( (int) $matches[1] );
+		}
+
 		return new WP_REST_Response( array( 'deleted' => $external_id ) );
 	}
 
@@ -458,6 +566,7 @@ class Rest_Controller {
 		}
 
 		$this->forget_all_trained_markers();
+		Extra_Content::forget_trained();
 
 		return new WP_REST_Response( array( 'deleted' => 'all' ) );
 	}

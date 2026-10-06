@@ -461,6 +461,52 @@ wp-content/themes/dein-theme/bluebranch-chatbot/search.php
 Ein Page-Builder, der sein Layout außerhalb von `post_content` ablegt, hängt sich an
 `bluebranch_chatbot_rendered_html` und liefert seine eigene Ausgabe.
 
+## Fragen und Feedback auswerten
+
+Unter *Einstellungen → Fragen & Feedback* lassen sich zwei Dinge einschalten, beide standardmäßig aus:
+
+- **Fragen und Antworten speichern.** Jede beantwortete Frage landet in der Tabelle
+  `{prefix}bluebranch_chatbot_log` – mit Antwort, Quellen, Seite und Modul, aber **ohne**
+  IP-Adresse, Browser oder Nutzerkennung. E-Mail-Adressen, Telefonnummern und IBANs in Frage und
+  Kommentar werden vor dem Speichern maskiert. Die Aufbewahrung ist einstellbar (Standard 180
+  Tage, 0 = unbegrenzt); ein täglicher Lauf löscht ältere Einträge.
+- **Feedback abfragen.** Unter jeder fertigen Antwort erscheinen 👍 und 👎; bei 👎 ein kleines
+  Textfeld (höchstens 1000 Zeichen, ohne HTML). Ist das Speichern aus, wird eine Antwort nur
+  dann zur Zeile, wenn jemand Feedback gibt – bis dahin liegt sie zwei Stunden in einem
+  Transient. Der Browser bekommt je Antwort nur eine zufällige Referenz; Frage und Antwort
+  nimmt der Server aus seiner eigenen Aufzeichnung, nicht aus dem, was ein Skript behauptet.
+
+*BlueBranch Chatbot → Fragen & Feedback* zeigt die Einträge mit Suche, Filter nach Bewertung,
+Sammellöschung und **CSV-Export** (Semikolon, UTF-8 mit BOM, Formeln entschärft).
+
+Beides gehört in die Datenschutzerklärung der Website.
+
+## Chat exportieren
+
+Im Kopf des Chat-Widgets lädt ⤓ den Verlauf als `.txt` oder als WebVTT (`.vtt`) herunter. Die
+Datei entsteht im Browser; nichts davon geht an den Server.
+
+Der Verlauf selbst liegt im `localStorage` – inzwischen samt Antworten, Quellen und gegebenem
+Feedback. Eine Antwort wird schon während des Streams gesichert; wer mittendrin die Seite
+wechselt, findet sie danach mit dem Hinweis „Antwort unterbrochen“.
+
+Der Verlauf gilt für die ganze Website (Schlüssel `bluebranch_chatbot_history`). Bis 1.0.x hing
+er an der Element-ID des Widgets, die einen Zähler je Seite trägt (`…-widget-1`, `…-widget-2`) –
+nach einem Seitenwechsel war der Chat deshalb oft leer. Alte Verläufe werden beim ersten Laden
+übernommen.
+
+## Zusatzinhalte
+
+*BlueBranch Chatbot → Zusatzinhalte* nimmt auf, was auf keiner Seite steht: Textfelder für
+Meta-Infos (Öffnungszeiten, Konditionen, Hinweise an den Chatbot) und Dateien aus der Mediathek
+(TXT, MD, CSV, HTML, PDF, DOCX, ODT, bis 20 MB). Dateien werden **auf dieser Website** in Text
+umgewandelt – PDFs über `smalot/pdfparser`, Office-Dokumente über `ZipArchive`. An die API geht
+ausschließlich Text, als `extra_<id>` mit Typ `document` bzw. `note` und **ohne URL**; Antworten,
+die sich darauf stützen, zeigen deshalb keinen Link. Höchstens 200.000 Zeichen je Eintrag.
+
+Speichern trainiert sofort, Ausschalten oder Löschen entfernt den Eintrag aus der Wissensbasis.
+Wird eine Datei in der Mediathek ersetzt, überträgt der tägliche Lauf sie neu.
+
 ## Datenschutz und Hosting
 
 - **Hosting in Deutschland.** Server und Datenverarbeitung liegen ausschließlich in Deutschland.
@@ -482,14 +528,14 @@ Das Deaktivieren lässt Einstellungen und Wissensbasis in Ruhe – ein Plugin wi
 abgeschaltet, um etwas zu prüfen, und eine Deaktivierung, die den Bestand eines Kunden löscht,
 wäre nicht wiederherstellbar.
 
-Beim **Löschen** entfernt `uninstall.php` alle Optionen, Transients, Cron-Ereignisse und
-Beitrags-Metadaten. Die trainierten Inhalte bei der API bleiben bestehen: Sie gehören zum Zugang,
+Beim **Löschen** entfernt `uninstall.php` alle Optionen, Transients, Cron-Ereignisse,
+Beitrags-Metadaten und die beiden Tabellen (gespeicherte Fragen, Zusatzinhalte). Die trainierten Inhalte bei der API bleiben bestehen: Sie gehören zum Zugang,
 nicht zu dieser Installation. Wer sie loswerden will, benutzt vorher *Alle Inhalte löschen*.
 
 ## Entwicklung
 
 ```bash
-composer install
+composer install            # für Releases: composer install --no-dev (smalot/pdfparser)
 composer lint   # PHP_CodeSniffer gegen die WordPress Coding Standards
 composer fix    # behebt, was sich automatisch beheben lässt
 ```

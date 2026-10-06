@@ -10,6 +10,7 @@ namespace BlueBranch\Chatbot\Admin;
 use BlueBranch\Chatbot\Logger;
 use BlueBranch\Chatbot\Options;
 use BlueBranch\Chatbot\Rest_Controller;
+use BlueBranch\Chatbot\Text_Extractor;
 
 use const BlueBranch\Chatbot\VERSION;
 
@@ -39,6 +40,16 @@ class Admin {
 	 * Menu slug of the settings screen.
 	 */
 	const PAGE_SETTINGS = 'bluebranch-chatbot-settings';
+
+	/**
+	 * Menu slug of the additional content screen.
+	 */
+	const PAGE_EXTRA = 'bluebranch-chatbot-extra';
+
+	/**
+	 * Menu slug of the questions and feedback screen.
+	 */
+	const PAGE_LOG = 'bluebranch-chatbot-log';
 
 	/**
 	 * Capability every screen requires.
@@ -75,6 +86,13 @@ class Admin {
 	private $settings_hook = '';
 
 	/**
+	 * Screen identifier of the additional content page, which needs the media picker.
+	 *
+	 * @var string
+	 */
+	private $extra_hook = '';
+
+	/**
 	 * Builds the screens.
 	 */
 	public function __construct() {
@@ -82,6 +100,8 @@ class Admin {
 			'settings' => new Settings_Page(),
 			'content'  => new Trained_Content_Page(),
 			'training' => new Training_Page(),
+			'extra'    => new Extra_Content_Page(),
+			'log'      => new Log_Page(),
 		);
 	}
 
@@ -94,9 +114,12 @@ class Admin {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', array( $this, 'render_notices' ) );
+		add_filter( 'upload_mimes', array( $this, 'allow_markdown' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( BLUEBRANCH_CHATBOT_FILE ), array( $this, 'add_action_link' ) );
 
 		$this->screens['settings']->register();
+		$this->screens['extra']->register();
+		$this->screens['log']->register();
 		( new Post_Meta_Box() )->register();
 	}
 
@@ -145,6 +168,31 @@ class Admin {
 			array( $this->screens['training'], 'render' )
 		);
 
+		$this->extra_hook = add_submenu_page(
+			self::PAGE_CONTENT,
+			__( 'Additional content', 'bluebranch-chatbot' ),
+			__( 'Additional content', 'bluebranch-chatbot' ),
+			self::CAPABILITY,
+			self::PAGE_EXTRA,
+			array( $this->screens['extra'], 'render' )
+		);
+
+		$this->hooks[] = $this->extra_hook;
+
+		$log_hook = add_submenu_page(
+			self::PAGE_CONTENT,
+			__( 'Questions & feedback', 'bluebranch-chatbot' ),
+			__( 'Questions & feedback', 'bluebranch-chatbot' ),
+			self::CAPABILITY,
+			self::PAGE_LOG,
+			array( $this->screens['log'], 'render' )
+		);
+
+		$this->hooks[] = $log_hook;
+
+		// Bulk actions redirect afterwards, so they run before any output.
+		add_action( 'load-' . $log_hook, array( $this->screens['log'], 'handle_actions' ) );
+
 		$this->settings_hook = add_submenu_page(
 			self::PAGE_CONTENT,
 			__( 'Settings', 'bluebranch-chatbot' ),
@@ -155,6 +203,23 @@ class Admin {
 		);
 
 		$this->hooks[] = $this->settings_hook;
+	}
+
+	/**
+	 * Lets administrators upload Markdown files for the additional content.
+	 *
+	 * WordPress does not know the extension and refuses the upload. Limited
+	 * to those who may manage the chatbot; nobody else gains anything.
+	 *
+	 * @param array<string, string> $mimes Allowed extensions.
+	 * @return array<string, string>
+	 */
+	public function allow_markdown( $mimes ) {
+		if ( current_user_can( self::CAPABILITY ) && ! isset( $mimes['md'] ) ) {
+			$mimes['md'] = 'text/markdown';
+		}
+
+		return $mimes;
 	}
 
 	/**
@@ -201,7 +266,7 @@ class Admin {
 		// script checks for both before touching them, so they are enqueued
 		// here rather than declared as dependencies -- a dependency would drag
 		// the colour picker onto every screen of the plugin.
-		if ( $hook_suffix === $this->settings_hook ) {
+		if ( $hook_suffix === $this->settings_hook || $hook_suffix === $this->extra_hook ) {
 			wp_enqueue_media();
 			wp_enqueue_script( 'wp-color-picker' );
 			wp_enqueue_style( 'wp-color-picker' );
@@ -222,9 +287,10 @@ class Admin {
 			'bluebranch-chatbot-admin',
 			'bluebranchChatbotAdmin',
 			array(
-				'restUrl' => esc_url_raw( rest_url( Rest_Controller::REST_NAMESPACE ) ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'strings' => array(
+				'restUrl'        => esc_url_raw( rest_url( Rest_Controller::REST_NAMESPACE ) ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'extraMimeTypes' => array_values( array_unique( Text_Extractor::mime_types() ) ),
+				'strings'        => array(
 					'confirmDelete'     => __( 'Remove this entry from the knowledge base?', 'bluebranch-chatbot' ),
 					'confirmDeleteAll'  => __( 'Remove everything from the knowledge base? This cannot be undone.', 'bluebranch-chatbot' ),
 					'deleting'          => __( 'Removing …', 'bluebranch-chatbot' ),

@@ -26,6 +26,7 @@ class Plugin {
 	public function register() {
 		add_action( 'init', array( $this, 'register_meta' ) );
 
+		( new Schema() )->register();
 		( new Crawl_Marker() )->register();
 		( new Indexer() )->register();
 		( new Cron() )->register();

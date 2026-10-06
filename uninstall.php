@@ -24,11 +24,23 @@ function bluebranch_chatbot_uninstall_site() {
 	delete_option( 'bluebranch_chatbot_api_key' );
 	delete_option( 'bluebranch_chatbot_purge_last_run' );
 	delete_option( 'bluebranch_chatbot_last_error' );
+	delete_option( 'bluebranch_chatbot_db_version' );
+
+	// The plugin's own tables: saved questions and the additional content.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}bluebranch_chatbot_log" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}bluebranch_chatbot_content" );
+
+	// Answers waiting for feedback while saving is off.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_bbchat\\_ans\\_%' OR option_name LIKE '\\_transient\\_timeout\\_bbchat\\_ans\\_%'" );
 
 	delete_transient( 'bluebranch_chatbot_train_queue' );
 	delete_transient( 'bluebranch_chatbot_boilerplate' );
 
 	wp_clear_scheduled_hook( 'bluebranch_chatbot_purge' );
+	wp_clear_scheduled_hook( 'bluebranch_chatbot_maintenance' );
 	wp_clear_scheduled_hook( 'bluebranch_chatbot_train_post' );
 	wp_clear_scheduled_hook( 'bluebranch_chatbot_delete_post' );
 

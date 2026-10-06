@@ -40,6 +40,27 @@ class Api_Client {
 	private $stream_error_body = '';
 
 	/**
+	 * Bytes of the streamed answer not yet split into events.
+	 *
+	 * @var string
+	 */
+	private $capture_buffer = '';
+
+	/**
+	 * The answer as assembled from the stream so far.
+	 *
+	 * @var string
+	 */
+	private $captured_answer = '';
+
+	/**
+	 * The sources the stream announced.
+	 *
+	 * @var array
+	 */
+	private $captured_sources = array();
+
+	/**
 	 * Hands one page to the knowledge base.
 	 *
 	 * @param array $payload Content to train.
@@ -285,6 +306,9 @@ class Api_Client {
 
 		$this->stream_status     = null;
 		$this->stream_error_body = '';
+		$this->capture_buffer    = '';
+		$this->captured_answer   = '';
+		$this->captured_sources  = array();
 
 		add_action( 'http_api_curl', array( $this, 'configure_stream_handle' ), 10, 2 );
 
@@ -315,6 +339,11 @@ class Api_Client {
 			return;
 		}
 
+		// Whatever is left in the buffer is the last event, sent without the
+		// blank line that would normally close it.
+		$this->capture_events( true );
+		$this->finish_answer( $payload, $this->captured_answer, $this->captured_sources );
+
 		Sse::end();
 	}
 
@@ -338,6 +367,82 @@ class Api_Client {
 			},
 			$query
 		);
+	}
+
+	/**
+	 * Keeps the finished answer and tells the browser how to rate it.
+	 *
+	 * The `meta` event is only sent while feedback is switched on: without it
+	 * the reference would be of no use to anybody.
+	 *
+	 * @param array  $payload Prompt and the context the REST route added under 'log'.
+	 * @param string $answer  The complete answer.
+	 * @param array  $sources The sources of the answer.
+	 * @return void
+	 */
+	private function finish_answer( array $payload, $answer, array $sources ) {
+		if ( empty( $payload['log'] ) || ! is_array( $payload['log'] ) ) {
+			return;
+		}
+
+		$ref = Answer_Log::record(
+			array_merge(
+				$payload['log'],
+				array(
+					'question' => isset( $payload['prompt'] ) ? (string) $payload['prompt'] : '',
+					'answer'   => (string) $answer,
+					'sources'  => $sources,
+					'language' => isset( $payload['language'] ) ? (string) $payload['language'] : '',
+				)
+			)
+		);
+
+		if ( null !== $ref && Answer_Log::feedback_enabled() ) {
+			Sse::send( 'meta', array( 'ref' => $ref ) );
+		}
+	}
+
+	/**
+	 * Splits the captured bytes into events and reads answer and sources.
+	 *
+	 * Only reads; the bytes themselves have long been passed on unchanged.
+	 *
+	 * @param bool $flush Treat whatever remains as a complete event.
+	 * @return void
+	 */
+	private function capture_events( $flush = false ) {
+		$buffer = str_replace( "\r\n", "\n", $this->capture_buffer );
+		$blocks = explode( "\n\n", $buffer );
+
+		$this->capture_buffer = $flush ? '' : (string) array_pop( $blocks );
+
+		foreach ( $blocks as $block ) {
+			$data = array();
+
+			foreach ( explode( "\n", $block ) as $line ) {
+				if ( str_starts_with( $line, 'data:' ) ) {
+					$data[] = ltrim( substr( $line, 5 ), ' ' );
+				}
+			}
+
+			if ( array() === $data ) {
+				continue;
+			}
+
+			$decoded = json_decode( implode( "\n", $data ), true );
+
+			if ( ! is_array( $decoded ) ) {
+				continue;
+			}
+
+			if ( isset( $decoded['answer'] ) && is_string( $decoded['answer'] ) ) {
+				$this->captured_answer .= $decoded['answer'];
+			}
+
+			if ( isset( $decoded['sources'] ) && is_array( $decoded['sources'] ) ) {
+				$this->captured_sources = $decoded['sources'];
+			}
+		}
 	}
 
 	/**
@@ -441,6 +546,13 @@ class Api_Client {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Verbatim SSE frames; see above.
 		echo $chunk;
 
+		// Read along so the finished answer can be kept for feedback. Capped,
+		// so a runaway stream cannot grow the buffer without limit.
+		if ( strlen( $this->captured_answer ) < 200000 ) {
+			$this->capture_buffer .= $chunk;
+			$this->capture_events();
+		}
+
 		Sse::flush();
 
 		return $length;
@@ -482,7 +594,8 @@ class Api_Client {
 	 * @return void
 	 */
 	private function stream_in_one_piece( array $payload ) {
-		$result = $this->generate_search( $payload );
+		// Only what the API knows: the log context is this plugin's business.
+		$result = $this->generate_search( array_intersect_key( $payload, array_flip( array( 'prompt', 'language' ) ) ) );
 
 		if ( is_wp_error( $result ) ) {
 			$status  = (int) $result->get_error_data( 'status' );
@@ -501,6 +614,12 @@ class Api_Client {
 		if ( ! empty( $result['answer'] ) ) {
 			Sse::send( '', array( 'answer' => (string) $result['answer'] ) );
 		}
+
+		$this->finish_answer(
+			$payload,
+			isset( $result['answer'] ) ? (string) $result['answer'] : '',
+			isset( $result['sources'] ) && is_array( $result['sources'] ) ? $result['sources'] : array()
+		);
 
 		Sse::end();
 	}

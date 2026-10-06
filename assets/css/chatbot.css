@@ -158,6 +158,7 @@
 
 .chatbot-widget__font-btn,
 .chatbot-widget__clear,
+.chatbot-widget__export,
 .chatbot-widget__close {
     -webkit-appearance: none;
     appearance: none;
@@ -218,6 +219,67 @@
     font-size: 22px;
 }
 
+/* Export: a button in the header with a small menu for the two formats. */
+.chatbot-widget__export-wrap {
+    position: relative;
+}
+
+.chatbot-widget__export {
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+.chatbot-widget__export:hover,
+.chatbot-widget__export[aria-expanded="true"] {
+    opacity: 1;
+}
+
+.chatbot-widget__export-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    min-width: 170px;
+    padding: 4px;
+    border: 1px solid var(--chatbot-widget-border);
+    border-radius: 10px;
+    background: var(--chatbot-widget-bg);
+    color: var(--chatbot-widget-text);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.chatbot-widget__export-menu[hidden] {
+    display: none;
+}
+
+.chatbot-widget__export-menu button {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.chatbot-widget__export-menu button:hover,
+.chatbot-widget__export-menu button:focus-visible {
+    background: var(--chatbot-widget-bot-bubble);
+}
+
+.chatbot-widget__interrupted {
+    margin: 6px 0 0;
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--chatbot-widget-muted);
+}
+
 .chatbot-widget__messages {
     flex: 1 1 auto;
     overflow-y: auto;
@@ -237,6 +299,9 @@
 
 .chatbot-widget__message--bot {
     justify-content: flex-start;
+    /* Column, so the feedback bar sits below the bubble rather than beside it. */
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .chatbot-widget__bubble {
@@ -878,4 +943,88 @@
 .chatbot-submit--stop:focus-visible {
     background: rgba(128, 128, 128, 1);
     filter: none;
+}
+
+/* Feedback under an answer: shared by the chat widget and the search answer. */
+.chatbot-feedback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--chatbot-widget-muted, currentColor);
+}
+
+.chatbot-feedback__btn {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--chatbot-widget-border, rgba(128, 128, 128, 0.35));
+    border-radius: 999px;
+    background: transparent;
+    padding: 2px 8px;
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: pointer;
+    filter: grayscale(1);
+    opacity: 0.8;
+}
+
+.chatbot-feedback__btn:hover,
+.chatbot-feedback__btn:focus-visible,
+.chatbot-feedback__btn[aria-pressed="true"] {
+    filter: none;
+    opacity: 1;
+}
+
+.chatbot-feedback__btn[aria-pressed="true"] {
+    border-color: var(--chatbot-widget-accent, #2b6cb0);
+}
+
+.chatbot-feedback__btn:disabled {
+    cursor: wait;
+}
+
+.chatbot-feedback__form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-basis: 100%;
+    margin-top: 4px;
+}
+
+.chatbot-feedback__form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 14px;
+    padding: 6px 8px;
+    border: 1px solid var(--chatbot-widget-border, rgba(128, 128, 128, 0.35));
+    border-radius: 8px;
+    resize: vertical;
+}
+
+.chatbot-feedback__hint {
+    font-size: 12px;
+}
+
+.chatbot-feedback__form button {
+    align-self: flex-start;
+    border: 0;
+    border-radius: 999px;
+    padding: 4px 12px;
+    background: var(--chatbot-widget-accent, #2b6cb0);
+    color: var(--chatbot-widget-accent-contrast, #ffffff);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.chatbot-feedback__thanks {
+    flex-basis: 100%;
+    margin: 2px 0 0;
+}
+
+.chatbot-feedback__thanks[hidden] {
+    display: none;
 }
