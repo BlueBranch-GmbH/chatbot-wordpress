@@ -196,16 +196,8 @@ msgid "You are not allowed to access this page."
 msgstr "Sie haben keine Berechtigung für diese Seite."
 
 #: admin/class-extra-content-page.php:122
-msgid ""
-"Information that is on no page of the site: opening hours, conditions, "
-"internal notes for the chatbot, or documents. Files are converted to text on "
-"this site; only that text is sent to the API. Answers based on these entries "
-"show no link."
-msgstr ""
-"Informationen, die auf keiner Seite der Website stehen: Öffnungszeiten, "
-"Konditionen, interne Hinweise für den Chatbot oder Dokumente. Dateien werden "
-"auf dieser Website in Text umgewandelt; nur dieser Text geht an die API. "
-"Antworten, die sich darauf stützen, zeigen keinen Link."
+msgid "Information that is on no page of the site: opening hours, conditions, background for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link. Everything entered here can be asked about by any visitor and may be quoted in answers -- do not add confidential or internal information."
+msgstr "Informationen, die auf keiner Seite der Website stehen: Öffnungszeiten, Konditionen, Hintergrund für den Chatbot oder Dokumente. Dateien werden auf dieser Website in Text umgewandelt; nur dieser Text geht an die API. Antworten, die sich darauf stützen, zeigen keinen Link. Alles, was hier steht, kann jeder Besucher erfragen, und es kann in Antworten zitiert werden – bitte keine vertraulichen oder internen Informationen eintragen."
 
 #: admin/class-extra-content-page.php:133
 msgid "Saved."
@@ -1492,3 +1484,16 @@ msgstr "Ein aufklappbarer Chat-Button, der aus den eigenen Inhalten antwortet."
 #: includes/class-extra-content.php
 msgid "The file was deleted from the media library."
 msgstr "Die Datei wurde aus der Mediathek gelöscht."
+
+#: includes/class-rest-controller.php
+msgid "This request is not allowed from another website."
+msgstr "Diese Anfrage ist von einer anderen Website aus nicht erlaubt."
+
+#: includes/class-text-extractor.php
+msgid "The document is too large once unpacked."
+msgstr "Das Dokument ist entpackt zu groß."
+
+#. translators: %d: requests per minute.
+#: admin/class-admin.php
+msgid "%d requests per minute."
+msgstr "%d Anfragen je Minute."

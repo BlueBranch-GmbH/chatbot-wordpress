@@ -39,6 +39,11 @@ class Rest_Controller {
 	const TRAIN_QUEUE = 'bluebranch_chatbot_train_queue';
 
 	/**
+	 * Header the script sends the answer token in.
+	 */
+	const TOKEN_HEADER = 'X-BB-Token';
+
+	/**
 	 * Hooks the routes into WordPress.
 	 *
 	 * @return void
@@ -106,7 +111,10 @@ class Rest_Controller {
 			self::REST_NAMESPACE,
 			'/chat/stream',
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				// POST is what the plugin's script uses: question, chat history and
+				// page text travel in the body, not in a URL that ends up in access
+				// logs. GET stays for pages still cached with the 1.0 script.
+				'methods'             => WP_REST_Server::READABLE . ', ' . WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'stream_chat' ),
 				'permission_callback' => '__return_true',
 				'args'                => $prompt_args,
@@ -117,7 +125,10 @@ class Rest_Controller {
 			self::REST_NAMESPACE,
 			'/generate/stream',
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				// POST is what the plugin's script uses: question, chat history and
+				// page text travel in the body, not in a URL that ends up in access
+				// logs. GET stays for pages still cached with the 1.0 script.
+				'methods'             => WP_REST_Server::READABLE . ', ' . WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'stream_generate' ),
 				'permission_callback' => '__return_true',
 				'args'                => $prompt_args,
@@ -332,18 +343,92 @@ class Rest_Controller {
 	/**
 	 * Hands out a fresh token.
 	 *
-	 * @return WP_REST_Response
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_token() {
+	public function get_token( WP_REST_Request $request ) {
+		$cross_site = $this->cross_site_refusal( $request );
+
+		if ( null !== $cross_site ) {
+			return $cross_site;
+		}
+
 		if ( ! Rate_Limiter::allow( 'token', 60, MINUTE_IN_SECONDS ) ) {
 			return new WP_REST_Response( array( 'message' => __( 'Too many requests.', 'bluebranch-chatbot' ) ), 429 );
 		}
 
-		return new WP_REST_Response(
+		$response = new WP_REST_Response(
 			array(
-				'token' => Answer_Token::issue(),
-				'param' => Answer_Token::PARAM,
+				'token'  => Answer_Token::issue(),
+				'param'  => Answer_Token::PARAM,
+				'header' => self::TOKEN_HEADER,
 			)
+		);
+
+		// A CDN that caches /wp-json/ would otherwise hand every visitor the
+		// same token until it expires -- and then nobody gets an answer.
+		$response->header( 'Cache-Control', 'no-store, private, max-age=0' );
+
+		return $response;
+	}
+
+	/**
+	 * The token of a request: from the header the script sends, or the
+	 * parameter older cached pages still use.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return string
+	 */
+	private function request_token( WP_REST_Request $request ) {
+		$header = (string) $request->get_header( 'x_bb_token' );
+
+		return '' !== $header ? sanitize_text_field( $header ) : (string) $request->get_param( Answer_Token::PARAM );
+	}
+
+	/**
+	 * Refuses requests made by another website through its visitors' browsers.
+	 *
+	 * The token is no barrier there: any page can fetch one. Browsers tell us
+	 * where a request comes from -- Sec-Fetch-Site in all current ones, Origin
+	 * on cross-origin and POST requests -- and a foreign site has no say over
+	 * either. Requests without both headers (curl, old browsers) pass; they
+	 * are what the rate limits are for.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_Error|null
+	 */
+	private function cross_site_refusal( WP_REST_Request $request ) {
+		$fetch_site = strtolower( (string) $request->get_header( 'sec_fetch_site' ) );
+		$origin     = (string) $request->get_header( 'origin' );
+
+		if ( '' !== $fetch_site && in_array( $fetch_site, array( 'same-origin', 'none' ), true ) ) {
+			return null;
+		}
+
+		if ( '' === $fetch_site && '' === $origin ) {
+			return null;
+		}
+
+		$own = wp_parse_url( home_url(), PHP_URL_HOST );
+
+		/**
+		 * Filters the hosts whose pages may use the chatbot routes besides this
+		 * site's own, e.g. a second domain showing the same widget.
+		 *
+		 * @param string[] $hosts Host names.
+		 */
+		$allowed = array_map( 'strtolower', (array) apply_filters( 'bluebranch_chatbot_allowed_origins', array( $own ) ) );
+		$host    = '' !== $origin ? strtolower( (string) wp_parse_url( $origin, PHP_URL_HOST ) ) : '';
+
+		// same-site (a subdomain) is only accepted when the Origin names an allowed host.
+		if ( '' !== $host && in_array( $host, $allowed, true ) ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'bluebranch_chatbot_cross_site',
+			__( 'This request is not allowed from another website.', 'bluebranch-chatbot' ),
+			array( 'status' => 403 )
 		);
 	}
 
@@ -425,8 +510,8 @@ class Rest_Controller {
 	/**
 	 * Stores a visitor's rating of an answer.
 	 *
-	 * Guarded like the answer routes: the token shows the request came from a
-	 * page of this site, the counter keeps one client from flooding the table.
+	 * Guarded like the answer routes: the origin check keeps other websites
+	 * out, the token and the counter keep one client from flooding the table.
 	 * The reference itself is what limits the feedback to answers this
 	 * browser was actually given.
 	 *
@@ -434,7 +519,13 @@ class Rest_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_feedback( WP_REST_Request $request ) {
-		if ( ! Answer_Token::verify( $request->get_param( Answer_Token::PARAM ) ) ) {
+		$cross_site = $this->cross_site_refusal( $request );
+
+		if ( null !== $cross_site ) {
+			return $cross_site;
+		}
+
+		if ( ! Answer_Token::verify( $this->request_token( $request ) ) ) {
 			return new WP_Error(
 				'bluebranch_chatbot_token',
 				__( 'Your session has expired. Please reload the page and try again.', 'bluebranch-chatbot' ),
@@ -487,7 +578,25 @@ class Rest_Controller {
 			return $this->public_error( $result );
 		}
 
-		return new WP_REST_Response( $result );
+		// Only what a visitor needs. Whatever else the API puts into its answer
+		// -- now or in a later version -- stays on the server.
+		$sources = array();
+
+		foreach ( isset( $result['sources'] ) && is_array( $result['sources'] ) ? $result['sources'] : array() as $source ) {
+			if ( is_array( $source ) ) {
+				$sources[] = array(
+					'title' => isset( $source['title'] ) ? (string) $source['title'] : '',
+					'url'   => isset( $source['url'] ) ? (string) $source['url'] : '',
+				);
+			}
+		}
+
+		return new WP_REST_Response(
+			array(
+				'answer'  => isset( $result['answer'] ) ? (string) $result['answer'] : '',
+				'sources' => $sources,
+			)
+		);
 	}
 
 	/**
@@ -723,7 +832,13 @@ class Rest_Controller {
 	 * @return WP_Error|null
 	 */
 	private function public_request_refusal( WP_REST_Request $request ) {
-		if ( ! Answer_Token::verify( $request->get_param( Answer_Token::PARAM ) ) ) {
+		$cross_site = $this->cross_site_refusal( $request );
+
+		if ( null !== $cross_site ) {
+			return $cross_site;
+		}
+
+		if ( ! Answer_Token::verify( $this->request_token( $request ) ) ) {
 			return new WP_Error(
 				'bluebranch_chatbot_token',
 				__( 'Your session has expired. Please reload the page and try again.', 'bluebranch-chatbot' ),
@@ -738,7 +853,18 @@ class Rest_Controller {
 		 */
 		$limit = (int) apply_filters( 'bluebranch_chatbot_rate_limit', 20 );
 
-		if ( ! Rate_Limiter::allow( 'answer', $limit, MINUTE_IN_SECONDS ) ) {
+		/**
+		 * Filters how many answers the whole site may ask for per minute.
+		 *
+		 * The per-client limit does nothing against many clients -- a botnet,
+		 * or an address range rotated through. This one caps what the
+		 * operator's quota can lose in a minute, whoever is asking.
+		 *
+		 * @param int $limit Number of requests.
+		 */
+		$site_limit = (int) apply_filters( 'bluebranch_chatbot_site_rate_limit', 120 );
+
+		if ( ! Rate_Limiter::allow( 'answer', $limit, MINUTE_IN_SECONDS ) || ! Rate_Limiter::allow( 'answer-site', $site_limit, MINUTE_IN_SECONDS, true ) ) {
 			return new WP_Error(
 				'bluebranch_chatbot_rate_limit',
 				__( 'There are too many open requests right now. Please try again in a minute.', 'bluebranch-chatbot' ),
@@ -765,6 +891,11 @@ class Rest_Controller {
 	 */
 	private function request_language( WP_REST_Request $request ) {
 		$language = (string) $request->get_param( 'language' );
+
+		// A code, nothing else: the value goes into the query of the API call.
+		if ( ! preg_match( '/^[a-z]{2}(-[A-Za-z]{2})?$/', $language ) ) {
+			$language = '';
+		}
 
 		if ( '' === $language ) {
 			$language = strtolower( substr( (string) get_bloginfo( 'language' ), 0, 2 ) );

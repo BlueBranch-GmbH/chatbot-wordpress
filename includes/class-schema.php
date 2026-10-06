@@ -28,7 +28,7 @@ class Schema {
 	/**
 	 * Version of the definitions below. Raise it whenever they change.
 	 */
-	const DB_VERSION = '1';
+	const DB_VERSION = '2';
 
 	/**
 	 * Option holding the schema version a site is on.
@@ -142,6 +142,12 @@ class Schema {
 				PRIMARY KEY  (id)
 			) {$charset};"
 		);
+
+		// Version 2: the API key stops being autoloaded on installations that
+		// stored it before Activation created the option without autoload.
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( Options::API_KEY, false ) ) {
+			wp_set_option_autoload( Options::API_KEY, false );
+		}
 
 		update_option( self::VERSION_OPTION, self::DB_VERSION, false );
 	}

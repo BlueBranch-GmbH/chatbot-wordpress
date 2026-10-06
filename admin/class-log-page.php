@@ -182,7 +182,9 @@ class Log_Page {
 		fputcsv(
 			$out,
 			array( 'id', 'created_at', 'source', 'post_id', 'page', 'language', 'question', 'answer', 'sources', 'rating', 'comment', 'feedback_at' ),
-			';'
+			';',
+			'"',
+			''
 		);
 
 		$offset = 0;
@@ -222,7 +224,12 @@ class Log_Page {
 							(string) $row['feedback_at'],
 						)
 					),
-					';'
+					';',
+					'"',
+					// No escape character: PHP's default backslash leaves `\"` unquoted,
+					// which Excel reads as the end of the cell -- a question like
+					// `x \";=1+2;` would then start a cell of its own with a formula.
+					''
 				);
 			}
 
@@ -238,16 +245,26 @@ class Log_Page {
 	/**
 	 * Defuses a value Excel would read as a formula.
 	 *
+	 * Every line of a multi-line value is checked: a spreadsheet that splits
+	 * cells on line breaks would otherwise see a formula at the start of the
+	 * second line.
+	 *
 	 * @param mixed $value Cell value.
 	 * @return string
 	 */
 	public function csv_cell( $value ) {
-		$value = (string) $value;
+		$lines = preg_split( '/(\r\n|\n|\r)/', (string) $value, -1, PREG_SPLIT_DELIM_CAPTURE );
 
-		if ( '' !== $value && false !== strpos( "=+-@\t\r", $value[0] ) ) {
-			return "'" . $value;
+		foreach ( $lines as $index => $line ) {
+			if ( 1 === $index % 2 ) {
+				continue;
+			}
+
+			if ( '' !== $line && false !== strpos( "=+-@\t\r", $line[0] ) ) {
+				$lines[ $index ] = "'" . $line;
+			}
 		}
 
-		return $value;
+		return implode( '', $lines );
 	}
 }

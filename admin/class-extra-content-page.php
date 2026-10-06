@@ -119,7 +119,7 @@ class Extra_Content_Page {
 		?>
 		<div class="wrap bluebranch-chatbot-admin bluebranch-chatbot-admin--extra">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-			<p><?php esc_html_e( 'Information that is on no page of the site: opening hours, conditions, internal notes for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link.', 'bluebranch-chatbot' ); ?></p>
+			<p><?php esc_html_e( 'Information that is on no page of the site: opening hours, conditions, background for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link. Everything entered here can be asked about by any visitor and may be quoted in answers -- do not add confidential or internal information.', 'bluebranch-chatbot' ); ?></p>
 
 			<?php
 			Admin::render_missing_key_notice();

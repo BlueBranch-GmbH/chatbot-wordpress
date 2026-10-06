@@ -156,6 +156,10 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Answers are kept in the chat history while they arrive, together with their sources and the feedback given, so a page change no longer loses them.
 * New screen "Additional content": notes and documents (TXT, MD, CSV, HTML, PDF, DOCX, ODT) without a page of their own. Files are converted to text on the site; only text is sent to the API, and such answers show no link.
 * Sources without an address are no longer listed under an answer.
+* Security: questions, chat history and page text are sent in the body of a POST instead of the URL (and so stay out of access logs); requests from other websites are refused; a site-wide answer limit adds to the per-client one, IPv6 counts per /64, and a filter supplies the client address behind a proxy.
+* Security: the CSV export also defuses formulas hidden behind a backslash before a quote and in later lines of a cell; training in render mode renders as a visitor, so members-only content no longer reaches the knowledge base; DOCX/ODT and PDF files are limited in how far they may unpack, and a file that failed is only parsed again once it changes.
+* Security: the non-streaming answer route returns only the answer and its sources; the token route is never cached; the API address must use https; the API key is no longer autoloaded; uninstalling also removes per-post scheduled events and rate-limit counters.
+* The chat history in the browser is dropped after 24 hours without activity.
 
 = 1.0.0 =
 * First release for WordPress, ported from the BlueBranch Chatbot extension for Contao.

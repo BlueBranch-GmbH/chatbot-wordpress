@@ -399,8 +399,21 @@ class Content_Extractor {
 		$GLOBALS['post'] = $post;
 		setup_postdata( $post );
 
-		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Applying WordPress's own filter is the point: it is what makes blocks, shortcodes and page builders render as the reader sees them.
-		$html = apply_filters( 'the_content', $content );
+		/*
+		 * Rendered as a visitor, not as the administrator who started the run:
+		 * shortcodes and blocks that show members-only content check the
+		 * current user, and whatever they print here ends up in a knowledge
+		 * base anyone can ask. The user is put back even if a filter throws.
+		 */
+		$previous_user = get_current_user_id();
+		wp_set_current_user( 0 );
+
+		try {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Applying WordPress's own filter is the point: it is what makes blocks, shortcodes and page builders render as the reader sees them.
+			$html = apply_filters( 'the_content', $content );
+		} finally {
+			wp_set_current_user( $previous_user );
+		}
 
 		wp_reset_postdata();
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the value swapped out above.

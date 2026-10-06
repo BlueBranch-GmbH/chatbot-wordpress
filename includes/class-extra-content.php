@@ -185,11 +185,15 @@ class Extra_Content {
 				self::withdraw( $id );
 			}
 
+			// The fingerprint of the file that failed: refresh_changed() tries it
+			// again only once the file is a different one. Parsing the same
+			// broken or oversized PDF every day would only cost memory and time.
 			self::update(
 				$id,
 				array(
 					'status'     => 'failed',
 					'last_error' => $text->get_error_message(),
+					'file_hash'  => self::file_hash( $row ),
 				)
 			);
 
@@ -216,12 +220,15 @@ class Extra_Content {
 		$chars = function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : strlen( $text );
 
 		if ( is_wp_error( $result ) ) {
+			// The text was fine, the API was not: no fingerprint, so the next
+			// run tries again.
 			self::update(
 				$id,
 				array(
 					'status'     => 'failed',
 					'last_error' => $result->get_error_message(),
 					'chars'      => $chars,
+					'file_hash'  => '',
 				)
 			);
 
@@ -264,6 +271,11 @@ class Extra_Content {
 			}
 
 			$changed = 'file' === $row['kind'] && self::file_hash( $row ) !== $row['file_hash'];
+
+			// Failed on this very file before: wait until it is replaced.
+			if ( 'failed' === $row['status'] && 'file' === $row['kind'] && '' !== (string) $row['file_hash'] && ! $changed ) {
+				continue;
+			}
 
 			if ( $changed || 'trained' !== $row['status'] ) {
 				if ( self::train( (int) $row['id'], $changed ) ) {

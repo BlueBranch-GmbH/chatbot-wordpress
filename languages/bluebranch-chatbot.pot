@@ -1,194 +1,6 @@
 # Copyright (C) 2026 BlueBranch GmbH
 # This file is distributed under the GPL-2.0-or-later.
-msgid ""
-msgstr ""
-"Project-Id-Version: BlueBranch Chatbot 1.1.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bluebranch-chatbot\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T16:03:07+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: bluebranch-chatbot\n"
-
-#. Plugin Name of the plugin
-#: bluebranch-chatbot.php
-#: admin/class-admin.php:136
-#: admin/class-admin.php:137
-#: admin/class-post-meta-box.php:49
-msgid "BlueBranch Chatbot"
-msgstr ""
-
-#. Plugin URI of the plugin
-#: bluebranch-chatbot.php
-msgid "https://github.com/BlueBranch-GmbH/chatbot-wordpress"
-msgstr ""
-
-#. Description of the plugin
-#: bluebranch-chatbot.php
-msgid "AI chat and AI search that answer from your own content only. Your pages are handed to the BlueBranch Chatbot API, which builds a vector knowledge base; answers are rendered as a collapsible chat widget, an ask field or a summary above your search results. The API key never leaves the server."
-msgstr ""
-
-#. Author of the plugin
-#: bluebranch-chatbot.php
-msgid "BlueBranch GmbH"
-msgstr ""
-
-#. Author URI of the plugin
-#: bluebranch-chatbot.php
-msgid "https://www.bluebranch.de/"
-msgstr ""
-
-#: admin/class-admin.php:156
-#: admin/class-admin.php:157
-msgid "Trained content"
-msgstr ""
-
-#: admin/class-admin.php:164
-#: admin/class-admin.php:165
-#: admin/class-training-page.php:59
-msgid "Train content"
-msgstr ""
-
-#: admin/class-admin.php:173
-#: admin/class-admin.php:174
-msgid "Additional content"
-msgstr ""
-
-#: admin/class-admin.php:184
-#: admin/class-admin.php:185
-#: admin/class-settings-page.php:125
-msgid "Questions & feedback"
-msgstr ""
-
-#: admin/class-admin.php:198
-#: admin/class-admin.php:199
-#: admin/class-admin.php:235
-msgid "Settings"
-msgstr ""
-
-#: admin/class-admin.php:294
-msgid "Remove this entry from the knowledge base?"
-msgstr ""
-
-#: admin/class-admin.php:295
-msgid "Remove everything from the knowledge base? This cannot be undone."
-msgstr ""
-
-#: admin/class-admin.php:296
-msgid "Removing …"
-msgstr ""
-
-#: admin/class-admin.php:297
-#: admin/class-extra-content-page.php:283
-#: admin/class-log-list-table.php:91
-msgid "Delete"
-msgstr ""
-
-#: admin/class-admin.php:298
-#: admin/class-extra-content-page.php:131
-msgid "That did not work."
-msgstr ""
-
-#: admin/class-admin.php:299
-msgid "No trained content found."
-msgstr ""
-
-#: admin/class-admin.php:300
-msgid "entries"
-msgstr ""
-
-#. translators: 1: number shown, 2: number in total.
-#: admin/class-admin.php:302
-#, php-format
-msgid "%1$d of %2$d entries"
-msgstr ""
-
-#. translators: 1: posts done, 2: posts in total.
-#: admin/class-admin.php:304
-#, php-format
-msgid "%1$d of %2$d posts trained"
-msgstr ""
-
-#: admin/class-admin.php:305
-msgid "Run finished."
-msgstr ""
-
-#: admin/class-admin.php:306
-msgid "There is nothing to train."
-msgstr ""
-
-#: admin/class-admin.php:307
-msgid "Working out what to do …"
-msgstr ""
-
-#: admin/class-admin.php:308
-#: admin/class-extra-content-page.php:227
-msgid "trained"
-msgstr ""
-
-#: admin/class-admin.php:309
-msgid "unchanged"
-msgstr ""
-
-#: admin/class-admin.php:310
-msgid "withdrawn"
-msgstr ""
-
-#: admin/class-admin.php:311
-msgid "skipped"
-msgstr ""
-
-#: admin/class-admin.php:312
-#: admin/class-extra-content-page.php:228
-msgid "failed"
-msgstr ""
-
-#: admin/class-admin.php:313
-msgid "yes"
-msgstr ""
-
-#: admin/class-admin.php:314
-msgid "no"
-msgstr ""
-
-#. translators: 1: percentage dropped, 2: yes or no, 3: number of repeated blocks.
-#: admin/class-admin.php:316
-#, php-format
-msgid "%1$d%% of the page was dropped as furniture. Marked by the site itself: %2$s. Repeated blocks known: %3$d."
-msgstr ""
-
-#: admin/class-admin.php:346
-msgid "BlueBranch Chatbot:"
-msgstr ""
-
-#. translators: %s: human readable time difference, e.g. "5 minutes".
-#: admin/class-admin.php:351
-#, php-format
-msgid "%s ago"
-msgstr ""
-
-#. translators: %s: link to the settings screen.
-#: admin/class-admin.php:373
-#, php-format
-msgid "No API key has been stored yet. Nothing is trained and no answers are given until one is set on the <a href=\"%s\">settings screen</a>."
-msgstr ""
-
-#: admin/class-extra-content-page.php:46
-#: admin/class-extra-content-page.php:108
-#: admin/class-log-page.php:78
-#: admin/class-log-page.php:160
-#: admin/class-settings-page.php:171
-#: admin/class-trained-content-page.php:32
-#: admin/class-training-page.php:43
-msgid "You are not allowed to access this page."
-msgstr ""
-
-#: admin/class-extra-content-page.php:122
-msgid "Information that is on no page of the site: opening hours, conditions, internal notes for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link."
+msgid "Information that is on no page of the site: opening hours, conditions, background for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link. Everything entered here can be asked about by any visitor and may be quoted in answers -- do not add confidential or internal information."
 msgstr ""
 
 #: admin/class-extra-content-page.php:133
@@ -1262,4 +1074,17 @@ msgstr ""
 
 #: includes/class-extra-content.php
 msgid "The file was deleted from the media library."
+msgstr ""
+
+#: includes/class-rest-controller.php
+msgid "This request is not allowed from another website."
+msgstr ""
+
+#: includes/class-text-extractor.php
+msgid "The document is too large once unpacked."
+msgstr ""
+
+#. translators: %d: requests per minute.
+#: admin/class-admin.php
+msgid "%d requests per minute."
 msgstr ""

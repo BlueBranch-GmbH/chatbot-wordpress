@@ -15,6 +15,7 @@
 	// Overwritten by whatever the /token route reports, so the name only has to
 	// be agreed in one place -- on the server.
 	var TOKEN_PARAM = 'bb_token';
+	var TOKEN_HEADER = 'X-BB-Token';
 
 	/**
 	 * Fetches a token, reusing the one already in flight.
@@ -46,6 +47,10 @@
 				TOKEN_PARAM = data.param;
 			}
 
+			if ( data.header ) {
+				TOKEN_HEADER = data.header;
+			}
+
 			return data.token;
 		} ).catch( function ( error ) {
 			// A failed fetch must not be remembered, or every later attempt
@@ -58,30 +63,51 @@
 		return pendingToken;
 	}
 
-	function buildUrl( path, params, token ) {
-		var url = new window.URL( settings.restUrl + path, window.location.origin );
+	/**
+	 * Splits one server-sent-events block into its name and data.
+	 *
+	 * @param {string} block Lines of one event.
+	 * @return {{type: string, data: string}} The event.
+	 */
+	function parseBlock( block ) {
+		var type = 'message';
+		var data = [];
 
-		Object.keys( params ).forEach( function ( key ) {
-			if ( params[ key ] !== undefined && params[ key ] !== null && '' !== params[ key ] ) {
-				url.searchParams.set( key, params[ key ] );
+		block.split( /\r?\n/ ).forEach( function ( line ) {
+			if ( 0 === line.indexOf( 'event:' ) ) {
+				type = line.slice( 6 ).trim();
+			} else if ( 0 === line.indexOf( 'data:' ) ) {
+				data.push( line.slice( 5 ).replace( /^ /, '' ) );
 			}
 		} );
 
-		url.searchParams.set( TOKEN_PARAM, token );
+		return { type: type, data: data.join( '\n' ) };
+	}
 
-		return url.toString();
+	function parseJson( text ) {
+		try {
+			return JSON.parse( text );
+		} catch ( error ) {
+			return null;
+		}
 	}
 
 	/**
-	 * Opens an event stream and reports what arrives.
+	 * Streams an answer and reports what arrives.
+	 *
+	 * A POST read through fetch rather than an EventSource: EventSource can
+	 * only GET, which put the question, the chat history and -- for "summarise
+	 * this page" -- the page text into the URL, and from there into every
+	 * access log between the browser and WordPress. Now they travel in the
+	 * body and the token in a header.
 	 *
 	 * @param {string} path     Route below the plugin namespace.
-	 * @param {Object} params   Query parameters.
-	 * @param {Object} handlers onAnswer, onSources, onEnd and onError.
+	 * @param {Object} params   Fields of the request.
+	 * @param {Object} handlers onAnswer, onSources, onMeta, onEnd and onError.
 	 * @return {Object} An object with a close() method.
 	 */
 	function stream( path, params, handlers ) {
-		var source = null;
+		var controller = null;
 		var finished = false;
 		var retriedToken = false;
 		var receivedAnything = false;
@@ -93,8 +119,8 @@
 
 			finished = true;
 
-			if ( source ) {
-				source.close();
+			if ( controller ) {
+				controller.abort();
 			}
 
 			if ( errorMessage && handlers.onError ) {
@@ -104,87 +130,152 @@
 			}
 		}
 
+		/**
+		 * Handles one event. Returns true when the stream is over.
+		 *
+		 * @param {{type: string, data: string}} event The event.
+		 * @return {boolean}
+		 */
+		function dispatch( event ) {
+			var data = parseJson( event.data );
+
+			if ( 'end' === event.type ) {
+				finish( null );
+
+				return true;
+			}
+
+			if ( 'error' === event.type ) {
+				// A token that has merely aged out is not something to tell
+				// the visitor about; it is something to replace and retry.
+				if ( data && 'bluebranch_chatbot_token' === data.code && ! retriedToken ) {
+					retriedToken = true;
+					open( true );
+
+					return true;
+				}
+
+				// The answer was already on its way; a break at the end is not
+				// worth replacing what has been read with an error.
+				finish( receivedAnything ? null : ( data && data.message ? data.message : strings.requestError ) );
+
+				return true;
+			}
+
+			if ( ! data ) {
+				return false;
+			}
+
+			// The reference an answer can be rated by. Sent just before the end,
+			// and only while feedback is switched on.
+			if ( 'meta' === event.type ) {
+				if ( 'string' === typeof data.ref && /^[a-f0-9]{32}$/.test( data.ref ) && handlers.onMeta ) {
+					handlers.onMeta( data );
+				}
+
+				return false;
+			}
+
+			if ( data.answer && handlers.onAnswer ) {
+				receivedAnything = true;
+				handlers.onAnswer( data.answer );
+			}
+
+			if ( data.sources && data.sources.length && handlers.onSources ) {
+				handlers.onSources( data.sources );
+			}
+
+			return false;
+		}
+
+		function read( response, attempt ) {
+			var reader = response.body.getReader();
+			var decoder = new window.TextDecoder();
+			var buffer = '';
+
+			function pump() {
+				return reader.read().then( function ( result ) {
+					var index;
+					var done = false;
+
+					if ( attempt !== controller || finished ) {
+						return reader.cancel().catch( function () {} );
+					}
+
+					if ( result.done ) {
+						if ( '' !== buffer.trim() ) {
+							done = dispatch( parseBlock( buffer ) );
+						}
+
+						// No "end" event: the connection broke off.
+						if ( ! done && attempt === controller ) {
+							finish( receivedAnything ? null : strings.requestError );
+						}
+
+						return null;
+					}
+
+					buffer += decoder.decode( result.value, { stream: true } );
+
+					while ( -1 !== ( index = buffer.search( /\r?\n\r?\n/ ) ) ) {
+						done = dispatch( parseBlock( buffer.slice( 0, index ) ) );
+						buffer = buffer.slice( index ).replace( /^\r?\n\r?\n/, '' );
+
+						if ( done ) {
+							return reader.cancel().catch( function () {} );
+						}
+					}
+
+					return pump();
+				} );
+			}
+
+			return pump();
+		}
+
 		function open( force ) {
+			var attempt = null;
+
 			getToken( force ).then( function ( token ) {
+				var headers = {
+					Accept: 'text/event-stream',
+					'Content-Type': 'application/json'
+				};
+
 				if ( finished ) {
 					return;
 				}
 
-				source = new window.EventSource( buildUrl( path, params, token ) );
+				if ( controller ) {
+					controller.abort();
+				}
 
-				source.onmessage = function ( event ) {
-					var data;
+				attempt = new window.AbortController();
+				controller = attempt;
+				headers[ TOKEN_HEADER ] = token;
 
-					try {
-						data = JSON.parse( event.data );
-					} catch ( error ) {
-						return;
+				return window.fetch( settings.restUrl + path, {
+					method: 'POST',
+					credentials: 'same-origin',
+					signal: attempt.signal,
+					headers: headers,
+					body: JSON.stringify( params )
+				} ).then( function ( response ) {
+					if ( ! response.body ) {
+						finish( strings.requestError );
+
+						return null;
 					}
 
-					if ( data.answer && handlers.onAnswer ) {
-						receivedAnything = true;
-						handlers.onAnswer( data.answer );
-					}
-
-					if ( data.sources && data.sources.length && handlers.onSources ) {
-						handlers.onSources( data.sources );
-					}
-				};
-
-				// The reference an answer can be rated by. Sent just before the
-				// end, and only while feedback is switched on.
-				source.addEventListener( 'meta', function ( event ) {
-					var data;
-
-					try {
-						data = JSON.parse( event.data );
-					} catch ( error ) {
-						return;
-					}
-
-					if ( data && 'string' === typeof data.ref && /^[a-f0-9]{32}$/.test( data.ref ) && handlers.onMeta ) {
-						handlers.onMeta( data );
-					}
-				} );
-
-				source.addEventListener( 'end', function () {
-					finish( null );
-				} );
-
-				source.addEventListener( 'error', function ( event ) {
-					var data = null;
-
-					if ( event && 'string' === typeof event.data && '' !== event.data ) {
-						try {
-							data = JSON.parse( event.data );
-						} catch ( error ) {
-							data = null;
-						}
-					}
-
-					// A token that has merely aged out is not something to tell
-					// the visitor about; it is something to replace and retry.
-					if ( data && 'bluebranch_chatbot_token' === data.code && ! retriedToken ) {
-						retriedToken = true;
-						source.close();
-						source = null;
-						open( true );
-
-						return;
-					}
-
-					if ( receivedAnything ) {
-						// The answer was already on its way; a break at the end
-						// is not worth replacing what has been read with an error.
-						finish( null );
-
-						return;
-					}
-
-					finish( data && data.message ? data.message : strings.requestError );
+					// Refusals arrive as an event stream too, with a 4xx status.
+					return read( response, attempt );
 				} );
 			} ).catch( function () {
-				finish( strings.requestError );
+				// An abort -- by close() or by a retry with a fresh token, which
+				// replaces this attempt -- is wanted and not an error.
+				if ( null === attempt || attempt === controller ) {
+					finish( strings.requestError );
+				}
 			} );
 		}
 
@@ -194,8 +285,8 @@
 			close: function () {
 				finished = true;
 
-				if ( source ) {
-					source.close();
+				if ( controller ) {
+					controller.abort();
 				}
 			}
 		};

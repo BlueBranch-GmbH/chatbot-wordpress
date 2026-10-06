@@ -22,6 +22,12 @@ defined( 'ABSPATH' ) || exit;
 class Text_Extractor {
 
 	/**
+	 * Most a document body or a PDF stream may unpack to: 50 MB.
+	 */
+	const MAX_UNPACKED_BYTES = 52428800;
+
+
+	/**
 	 * Upper bound for the text handed on, in characters.
 	 */
 	const MAX_CHARS = 200000;
@@ -189,8 +195,16 @@ class Text_Extractor {
 			return new WP_Error( 'bluebranch_chatbot_file', __( 'PDF files cannot be read on this installation (the PDF library is missing).', 'bluebranch-chatbot' ) );
 		}
 
+		// The parser holds the whole document and its decoded streams in memory.
+		wp_raise_memory_limit( 'admin' );
+
 		try {
-			$parser = new \Smalot\PdfParser\Parser();
+			// Caps how far a single compressed stream may inflate -- a crafted PDF
+			// otherwise unpacks a few kilobytes into gigabytes.
+			$config = new \Smalot\PdfParser\Config();
+			$config->setDecodeMemoryLimit( self::MAX_UNPACKED_BYTES );
+
+			$parser = new \Smalot\PdfParser\Parser( array(), $config );
 
 			return (string) $parser->parseFile( $path )->getText();
 		} catch ( \Throwable $e ) {
@@ -226,7 +240,17 @@ class Text_Extractor {
 			return new WP_Error( 'bluebranch_chatbot_file', __( 'The document could not be opened.', 'bluebranch-chatbot' ) );
 		}
 
-		$xml = $zip->getFromName( $entry );
+		// The 20 MB limit applies to the packed file. Its body may unpack to many
+		// gigabytes (a zip bomb) and would take the request down with it.
+		$stat = $zip->statName( $entry );
+
+		if ( ! is_array( $stat ) || (int) $stat['size'] > self::MAX_UNPACKED_BYTES ) {
+			$zip->close();
+
+			return new WP_Error( 'bluebranch_chatbot_file', __( 'The document is too large once unpacked.', 'bluebranch-chatbot' ) );
+		}
+
+		$xml = $zip->getFromName( $entry, self::MAX_UNPACKED_BYTES );
 		$zip->close();
 
 		if ( ! is_string( $xml ) || '' === $xml ) {

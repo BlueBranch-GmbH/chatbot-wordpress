@@ -25,14 +25,20 @@ class Logger {
 	 * @return void
 	 */
 	public static function error( $message, array $context = array() ) {
-		update_option(
-			Options::LAST_ERROR,
-			array(
-				'message' => (string) $message,
-				'time'    => time(),
-			),
-			false
-		);
+		$stored = get_option( Options::LAST_ERROR );
+
+		// Written only when it says something new: the answer routes are public,
+		// and a failing API would otherwise mean one database write per visitor.
+		if ( ! is_array( $stored ) || ( $stored['message'] ?? '' ) !== (string) $message || time() - (int) ( $stored['time'] ?? 0 ) > 5 * MINUTE_IN_SECONDS ) {
+			update_option(
+				Options::LAST_ERROR,
+				array(
+					'message' => (string) $message,
+					'time'    => time(),
+				),
+				false
+			);
+		}
 
 		self::write( 'ERROR', $message, $context );
 	}
@@ -58,7 +64,11 @@ class Logger {
 	 * @return void
 	 */
 	public static function clear_last_error() {
-		delete_option( Options::LAST_ERROR );
+		// Checked first: delete_option() costs a query even when there is nothing
+		// to delete, and this runs on every successful public request.
+		if ( false !== get_option( Options::LAST_ERROR ) ) {
+			delete_option( Options::LAST_ERROR );
+		}
 	}
 
 	/**

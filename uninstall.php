@@ -39,10 +39,17 @@ function bluebranch_chatbot_uninstall_site() {
 	delete_transient( 'bluebranch_chatbot_train_queue' );
 	delete_transient( 'bluebranch_chatbot_boilerplate' );
 
-	wp_clear_scheduled_hook( 'bluebranch_chatbot_purge' );
-	wp_clear_scheduled_hook( 'bluebranch_chatbot_maintenance' );
-	wp_clear_scheduled_hook( 'bluebranch_chatbot_train_post' );
-	wp_clear_scheduled_hook( 'bluebranch_chatbot_delete_post' );
+	// wp_unschedule_hook() rather than wp_clear_scheduled_hook(): the per-post
+	// events carry the post id as argument, and the latter only removes
+	// events whose arguments match the ones it is given -- none.
+	wp_unschedule_hook( 'bluebranch_chatbot_purge' );
+	wp_unschedule_hook( 'bluebranch_chatbot_maintenance' );
+	wp_unschedule_hook( 'bluebranch_chatbot_train_post' );
+	wp_unschedule_hook( 'bluebranch_chatbot_delete_post' );
+
+	// Rate-limit counters and remembered extraction errors.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_bbchat\\_rl\\_%' OR option_name LIKE '\\_transient\\_timeout\\_bbchat\\_rl\\_%' OR option_name LIKE '\\_transient\\_bbchat\\_extra\\_error\\_%' OR option_name LIKE '\\_transient\\_timeout\\_bbchat\\_extra\\_error\\_%'" );
 
 	// Two meta keys across every post: no API exists for that, and doing it
 	// post by post would be one query per post on a site of any size.

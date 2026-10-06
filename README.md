@@ -357,10 +357,31 @@ Der Browser ruft ausschließlich WordPress-Routen auf, die ihrerseits die API an
 
 | Route | Aufgabe |
 |---|---|
-| `GET /wp-json/bluebranch-chatbot/v1/token` | Holt ein kurzlebiges Token |
-| `GET …/v1/chat/stream` | Antwort im Chat-Modus (kurz, schnell) |
-| `GET …/v1/generate/stream` | Antwort im Such-Modus (ausführlich) |
-| `POST …/v1/generate/search` | Antwort ohne Streaming |
+| `GET /wp-json/bluebranch-chatbot/v1/token` | Holt ein kurzlebiges Token (`Cache-Control: no-store`) |
+| `POST …/v1/chat/stream` | Antwort im Chat-Modus (kurz, schnell) |
+| `POST …/v1/generate/stream` | Antwort im Such-Modus (ausführlich) |
+| `POST …/v1/generate/search` | Antwort ohne Streaming (nur `answer` und `sources`) |
+| `POST …/v1/feedback` | Bewertung einer Antwort |
+
+Frage, Chatverlauf und – bei „Seite zusammenfassen“ – der Seitentext gehen seit 1.1.0 im
+JSON-Rumpf, das Token im Header `X-BB-Token`. Vorher öffnete das Skript eine `EventSource`,
+die nur GET kann: Alles stand in der URL und damit in den Zugriffslogs von Webserver, Proxy und
+CDN. Die GET-Variante der Stream-Routen bleibt für Seiten, die noch mit dem alten Skript im
+Cache liegen. **Offen:** Von WordPress zur API läuft die Frage weiterhin als GET-Parameter, weil
+die API die Stream-Routen nur per GET anbietet – das ist auf der API-Seite zu lösen.
+
+### Schutz der öffentlichen Routen
+
+- **Fremde Websites:** Anfragen mit `Sec-Fetch-Site: cross-site`/`same-site` oder einer fremden
+  `Origin` werden mit 403 abgelehnt. Sonst könnte eine andere Website den Chatbot über die
+  Browser ihrer Besucher benutzen – das Token hält das nicht auf, jede Seite kann eins holen.
+  Weitere eigene Domains über `bluebranch_chatbot_allowed_origins`.
+- **Ratenbegrenzung:** 20 Antworten je Minute und Client (IPv6 je /64), zusätzlich 120 je
+  Minute für die ganze Website (`bluebranch_chatbot_site_rate_limit`). Mit persistentem
+  Object-Cache wird atomar gezählt, sonst über Transients.
+- **Hinter einem Proxy oder CDN** kommen alle Besucher mit dessen Adresse an und teilen sich
+  einen Zähler. Über `bluebranch_chatbot_client_ip` die echte Adresse liefern – aber nur aus
+  einem Header, den der Proxy selbst setzt und überschreibt.
 
 Die Antworten kommen als Server-Sent Events zurück: zuerst ein `sources`-Ereignis mit den
 verwendeten Seiten, danach die Antwort in Stücken, zum Schluss ein `end`-Ereignis.
@@ -445,7 +466,7 @@ wp-content/themes/dein-theme/bluebranch-chatbot/search.php
 
 | Hook | Typ | Wirkung |
 |---|---|---|
-| `bluebranch_chatbot_api_base` | Filter | Adresse der API, etwa für eine Testinstanz |
+| `bluebranch_chatbot_api_base` | Filter | Adresse der API, etwa für eine Testinstanz (nur https; http nur für localhost, `*.test`, `*.localhost`) |
 | `bluebranch_chatbot_sitemap_urls` | Filter | Die aus der Sitemap gelesenen Adressen |
 | `bluebranch_chatbot_crawl_url` | Filter | Die Adresse, die der Crawler tatsächlich aufruft |
 | `bluebranch_chatbot_post_types` | Filter | Welche Inhaltstypen trainiert werden |
@@ -455,6 +476,9 @@ wp-content/themes/dein-theme/bluebranch-chatbot/search.php
 | `bluebranch_chatbot_post_language` | Filter | Sprache je Beitrag, für mehrsprachige Websites |
 | `bluebranch_chatbot_request_language` | Filter | Sprachcode einer Antwort-Anfrage |
 | `bluebranch_chatbot_rate_limit` | Filter | Antworten je Minute und Client |
+| `bluebranch_chatbot_site_rate_limit` | Filter | Antworten je Minute für die ganze Website |
+| `bluebranch_chatbot_client_ip` | Filter | Client-Adresse für die Ratenbegrenzung (hinter Proxy/CDN) |
+| `bluebranch_chatbot_allowed_origins` | Filter | Weitere Hosts, deren Seiten die Routen benutzen dürfen |
 | `bluebranch_chatbot_max_prompt_length` | Filter | Maximale Länge einer Frage |
 | `bluebranch_chatbot_show_auto_widget` | Filter | Ob der globale Chat-Button auf diesem Request erscheint |
 
@@ -494,6 +518,9 @@ Der Verlauf gilt für die ganze Website (Schlüssel `bluebranch_chatbot_history`
 er an der Element-ID des Widgets, die einen Zähler je Seite trägt (`…-widget-1`, `…-widget-2`) –
 nach einem Seitenwechsel war der Chat deshalb oft leer. Alte Verläufe werden beim ersten Laden
 übernommen.
+
+Ein Verlauf, in dem 24 Stunden lang nichts passiert ist, wird beim nächsten Laden verworfen –
+auf einem geteilten Rechner sähe der Nächste sonst die Fragen seines Vorgängers.
 
 ## Zusatzinhalte
 

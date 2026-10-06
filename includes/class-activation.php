@@ -29,6 +29,15 @@ class Activation {
 			add_option( Options::SETTINGS, Options::defaults() );
 		}
 
+		// Created without autoload: the key has no business being loaded into
+		// memory on every request, and add_option() is the only call that sets
+		// this for an option the Settings API saves later.
+		if ( false === get_option( Options::API_KEY, false ) ) {
+			add_option( Options::API_KEY, '', '', false );
+		} elseif ( function_exists( 'wp_set_option_autoload' ) ) {
+			wp_set_option_autoload( Options::API_KEY, false );
+		}
+
 		Schema::install();
 		Cron::schedule_events();
 	}

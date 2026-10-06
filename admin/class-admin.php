@@ -298,6 +298,8 @@ class Admin {
 					'failed'            => __( 'That did not work.', 'bluebranch-chatbot' ),
 					'empty'             => __( 'No trained content found.', 'bluebranch-chatbot' ),
 					'entries'           => __( 'entries', 'bluebranch-chatbot' ),
+					/* translators: %d: requests per minute. */
+					'tierRequests'      => __( '%d requests per minute.', 'bluebranch-chatbot' ),
 					/* translators: 1: number shown, 2: number in total. */
 					'filtered'          => __( '%1$d of %2$d entries', 'bluebranch-chatbot' ),
 					/* translators: 1: posts done, 2: posts in total. */

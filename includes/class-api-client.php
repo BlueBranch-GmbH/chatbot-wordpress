@@ -164,7 +164,25 @@ class Api_Client {
 		 *
 		 * @param string $base Base URL without a trailing slash.
 		 */
-		return untrailingslashit( (string) apply_filters( 'bluebranch_chatbot_api_base', self::API_BASE ) );
+		$base = untrailingslashit( (string) apply_filters( 'bluebranch_chatbot_api_base', self::API_BASE ) );
+		$host = (string) wp_parse_url( $base, PHP_URL_HOST );
+		$safe = 0 === strpos( $base, 'https://' );
+
+		// Plain http only for a test API on this machine: the API key travels
+		// with every request and must not cross a network unencrypted.
+		if ( ! $safe && 0 === strpos( $base, 'http://' ) ) {
+			$safe = in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true )
+				|| '.test' === substr( $host, -5 )
+				|| '.localhost' === substr( $host, -10 );
+		}
+
+		if ( ! $safe ) {
+			Logger::error( 'The filter bluebranch_chatbot_api_base returned an address without https; the default API is used instead.' );
+
+			return self::API_BASE;
+		}
+
+		return $base;
 	}
 
 	/**

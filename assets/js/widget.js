@@ -179,6 +179,32 @@
 		return best;
 	};
 
+	/**
+	 * Hours after the last message a stored conversation is dropped.
+	 */
+	ChatbotWidget.HISTORY_TTL = 24 * 60 * 60 * 1000;
+
+	/**
+	 * Whether the newest message of a stored conversation is older than the TTL.
+	 * Conversations without any timestamp (1.0.x) count as expired.
+	 *
+	 * @param {Array} entries Stored entries.
+	 * @return {boolean}
+	 */
+	ChatbotWidget.prototype.isExpired = function ( entries ) {
+		var newest = 0;
+
+		entries.forEach( function ( entry ) {
+			var time = entry && 'number' === typeof entry.end ? entry.end : ( entry && entry.time );
+
+			if ( 'number' === typeof time && time > newest ) {
+				newest = time;
+			}
+		} );
+
+		return Date.now() - newest > ChatbotWidget.HISTORY_TTL;
+	};
+
 	ChatbotWidget.prototype.loadHistory = function () {
 		var self = this;
 		var raw;
@@ -202,6 +228,21 @@
 		}
 
 		if ( ! Array.isArray( stored ) ) {
+			return;
+		}
+
+		/*
+		 * A conversation untouched for a day is dropped. The history lives in
+		 * the browser without an end otherwise, and on a shared computer the
+		 * next person would open the widget onto somebody else's questions.
+		 */
+		if ( this.isExpired( stored ) ) {
+			try {
+				window.localStorage.removeItem( this.storageKey );
+			} catch ( error ) {
+				// Nothing to clean up.
+			}
+
 			return;
 		}
 

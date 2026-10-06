@@ -204,7 +204,8 @@ class Sitemap {
 		// Some sitemaps are served as a .gz file rather than a compressed
 		// response, so the HTTP layer hands them over still packed.
 		if ( 0 === strpos( $body, "\x1f\x8b" ) && function_exists( 'gzdecode' ) ) {
-			$unpacked = gzdecode( $body );
+			// Capped: a few kilobytes of gzip can unpack to gigabytes.
+			$unpacked = gzdecode( $body, 50 * MB_IN_BYTES );
 			$body     = false === $unpacked ? $body : $unpacked;
 		}
 

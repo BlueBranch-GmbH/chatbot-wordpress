@@ -146,10 +146,12 @@ class Cron {
 	 * @return void
 	 */
 	public static function clear_events() {
-		wp_clear_scheduled_hook( self::EVENT_PURGE );
-		wp_clear_scheduled_hook( self::EVENT_MAINTENANCE );
-		wp_clear_scheduled_hook( Indexer::EVENT_TRAIN );
-		wp_clear_scheduled_hook( Indexer::EVENT_DELETE );
+		// wp_unschedule_hook(): the per-post events carry the post id as
+		// argument, and wp_clear_scheduled_hook() without arguments misses them.
+		wp_unschedule_hook( self::EVENT_PURGE );
+		wp_unschedule_hook( self::EVENT_MAINTENANCE );
+		wp_unschedule_hook( Indexer::EVENT_TRAIN );
+		wp_unschedule_hook( Indexer::EVENT_DELETE );
 	}
 
 	/**
