@@ -1,17 +1,17 @@
 # Stand und offene ToDos
 
-Stand: 12.10.2026, Version **1.2.1** (Tag `1.2.1`). Anforderungen und Sicherheitsprüfung:
+Stand: 12.10.2026, Version **1.2.2** (Tag `1.2.2`). Anforderungen und Sicherheitsprüfung:
 [ausbau-2026-10.md](ausbau-2026-10.md). Gemeinsamer Plan aller Repositories:
 `chatbot-contao` → `docs/ausbau-2026-10.md`.
 
 | Repository | Stand |
 |---|---|
-| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.1 |
+| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.2 |
 | `BlueBranch-GmbH/chatbot-contao` | 1.4.0 |
 | `spardorf-chatbot-api` | 0.0.56 |
 | `spardorf-chatbot-frontend` | 0.1.29 |
 
-## Was 1.2.0 und 1.2.1 enthalten
+## Was 1.2.0 bis 1.2.2 enthalten
 
 | Bereich | Stand | Getestet |
 |---|---|---|
@@ -20,6 +20,7 @@ Stand: 12.10.2026, Version **1.2.1** (Tag `1.2.1`). Anforderungen und Sicherheit
 | 1.2.1: Herkunft und Token im `permission_callback` (`check_visitor_permission`, `check_origin_permission`), kein `__return_true` mehr; Ratenlimits bleiben im Callback (WordPress ruft Permission-Callbacks auch für den `Allow`-Header auf) | fertig | phpcs; **nicht live** |
 | 1.2.1: `client.js` versteht eine JSON-Ablehnung vor dem Stream, erneuert abgelaufene Token einmal | fertig | Syntax; **nicht im Browser** |
 | 1.2.1: `readme.txt` nennt Nutzung und Kosten des API-Dienstes | fertig | – |
+| 1.2.2: Tabellennamen über `%i` in `$wpdb->prepare()` (Plugin Check: `UnescapedDBParameter`); Mindestversion WordPress 6.2 | fertig | phpcs; erzeugtes SQL mit echtem `wpdb` aus WP 7.1.3 geprüft |
 
 Nach dem Update auf 1.2.1 den Seiten-Cache leeren: Zwischengespeicherte Seiten laden sonst das
 alte Skript, und eine Ablehnung zeigt dort nur die allgemeine Fehlermeldung.
@@ -33,16 +34,18 @@ BlueBranch Chatbot“) bemängelte `permission_callback => '__return_true'` und 
 drei Monate nach der Vorprüfung abgelehnt (Mitte Dezember 2026).
 
 Das Paket für wordpress.org wird als **1.0.0** hochgeladen (erste Veröffentlichung im
-Verzeichnis), gebaut aus dem Tag `1.2.1`:
+Verzeichnis), gebaut aus dem jeweils neuesten Tag (zuletzt `1.2.2`). Das Paket aus `1.2.1` ist
+am 12.10.2026 hochgeladen worden; der automatische Plugin Check meldete danach die
+`UnescapedDBParameter`-Warnungen, die `1.2.2` behebt.
 
-1. `git archive 1.2.1`, darin `composer install --no-dev --optimize-autoloader`
+1. `git archive <tag>`, darin `composer install --no-dev --optimize-autoloader`
 2. Entfernen: `docs/`, `README.md`, `phpcs.xml.dist`, versteckte Dateien,
    `languages/*.po`, `*.mo`, `*.json` (nur die `.pot` bleibt)
 3. Plugin-Header, `VERSION` und `Stable tag` auf 1.0.0; Changelog und Upgrade Notice nur
    „1.0.0 – First release“
 4. Hochladen unter wordpress.org/plugins/developers/add, danach im Mail-Thread antworten
 
-Offen: Upload des Pakets und Antwort im Thread.
+Offen: Paket aus `1.2.2` hochladen, dann im Thread antworten.
 
 ## Was 1.1.0 enthält
 
