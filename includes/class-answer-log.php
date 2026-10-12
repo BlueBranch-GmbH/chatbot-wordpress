@@ -180,8 +180,8 @@ class Answer_Log {
 
 		$cutoff = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table, name from the prefix.
-		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . Schema::log_table() . ' WHERE created_at < %s', $cutoff ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table.
+		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', Schema::log_table(), $cutoff ) );
 	}
 
 	/**
@@ -201,8 +201,8 @@ class Answer_Log {
 
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Own table; one placeholder per id.
-		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . Schema::log_table() . " WHERE id IN ({$placeholders})", $ids ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Own table; $placeholders holds one %d per id, nothing else.
+		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE id IN ({$placeholders})", array_merge( array( Schema::log_table() ), $ids ) ) );
 	}
 
 	/**
@@ -295,8 +295,8 @@ class Answer_Log {
 	private static function exists( $ref ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table.
-		return null !== $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . Schema::log_table() . ' WHERE ref = %s', $ref ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table.
+		return null !== $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE ref = %s', Schema::log_table(), $ref ) );
 	}
 
 	/**

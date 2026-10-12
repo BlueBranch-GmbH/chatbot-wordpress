@@ -160,9 +160,9 @@ class Schema {
 	public static function drop() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names are built from the prefix, not from input.
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::log_table() );
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::content_table() );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Removing the plugin's own tables.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', self::log_table() ) );
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', self::content_table() ) );
 		// phpcs:enable
 
 		delete_option( self::VERSION_OPTION );

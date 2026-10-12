@@ -1,10 +1,10 @@
 === BlueBranch Chatbot ===
 Contributors: bluebranch
 Tags: ai, chatbot, search, assistant, gdpr
-Requires at least: 6.0
+Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -148,6 +148,10 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.2.2 =
+* Table names in database queries go through `$wpdb->prepare()` with the `%i` identifier placeholder instead of being concatenated into the SQL.
+* Requires WordPress 6.2 or newer (for `%i`).
+
 = 1.2.1 =
 * The public REST routes check origin and visitor token in their permission callback instead of inside the callback. Rate limits stay in the callback, because WordPress also runs permission callbacks to build the Allow header.
 * The chat script understands such a refusal before the stream opens and replaces an aged-out token once, as before.
@@ -186,6 +190,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.2.2 =
+Requires WordPress 6.2 or newer.
 
 = 1.2.1 =
 Visitor routes check origin and token in their permission callback. Clear the page cache so visitors get the updated chat script.

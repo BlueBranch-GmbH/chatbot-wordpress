@@ -31,7 +31,7 @@ Fertig!
 ## Voraussetzungen
 
 - PHP 7.4 oder neuer
-- WordPress 6.0 oder neuer
+- WordPress 6.2 oder neuer
 - Ein Chatbot-Zugang mit API-Schlüssel von [chatbot.bluebranch.de](https://chatbot.bluebranch.de)
 
 ## Was anders ist als unter Contao
@@ -605,7 +605,7 @@ the API.
 ## Requirements
 
 - PHP 7.4 or newer
-- WordPress 6.0 or newer
+- WordPress 6.2 or newer
 - A chatbot account with an API key from [chatbot.bluebranch.de](https://chatbot.bluebranch.de)
 
 ## What differs from the Contao version

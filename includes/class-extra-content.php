@@ -36,8 +36,8 @@ class Extra_Content {
 	public static function find( $id ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table.
-		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . Schema::content_table() . ' WHERE id = %d', (int) $id ), ARRAY_A );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table.
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', Schema::content_table(), (int) $id ), ARRAY_A );
 
 		return is_array( $row ) ? $row : null;
 	}
@@ -50,8 +50,8 @@ class Extra_Content {
 	public static function all() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table, no input.
-		$rows = $wpdb->get_results( 'SELECT * FROM ' . Schema::content_table() . ' ORDER BY id DESC', ARRAY_A );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table, no input.
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', Schema::content_table() ), ARRAY_A );
 
 		return is_array( $rows ) ? $rows : array();
 	}
@@ -295,8 +295,8 @@ class Extra_Content {
 	public static function forget_trained() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table, no input.
-		$wpdb->query( 'UPDATE ' . Schema::content_table() . " SET status = 'pending', checksum = '' WHERE status = 'trained'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table, no input.
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET status = 'pending', checksum = '' WHERE status = 'trained'", Schema::content_table() ) );
 	}
 
 	/**

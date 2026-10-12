@@ -138,10 +138,10 @@ class Log_List_Table extends \WP_List_Table {
 		$table  = Schema::log_table();
 		$offset = ( $this->get_pagenum() - 1 ) * self::PER_PAGE;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Own table; $where is prepared in Answer_Log::where().
-		$total       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} {$where}" );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Own table; $where is prepared in Answer_Log::where().
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i {$where}", $table ) );
 		$this->items = (array) $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} {$where} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d", self::PER_PAGE, $offset ),
+			$wpdb->prepare( "SELECT * FROM %i {$where} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d", $table, self::PER_PAGE, $offset ),
 			ARRAY_A
 		);
 		// phpcs:enable
