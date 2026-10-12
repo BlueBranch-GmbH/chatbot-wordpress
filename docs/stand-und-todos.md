@@ -1,15 +1,48 @@
 # Stand und offene ToDos
 
-Stand: 06.10.2026, Version **1.1.0** (Tag `1.1.0`). Anforderungen und Sicherheitsprüfung:
+Stand: 12.10.2026, Version **1.2.1** (Tag `1.2.1`). Anforderungen und Sicherheitsprüfung:
 [ausbau-2026-10.md](ausbau-2026-10.md). Gemeinsamer Plan aller Repositories:
 `chatbot-contao` → `docs/ausbau-2026-10.md`.
 
 | Repository | Stand |
 |---|---|
-| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.0 |
+| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.1 |
 | `BlueBranch-GmbH/chatbot-contao` | 1.4.0 |
 | `spardorf-chatbot-api` | 0.0.56 |
 | `spardorf-chatbot-frontend` | 0.1.29 |
+
+## Was 1.2.0 und 1.2.1 enthalten
+
+| Bereich | Stand | Getestet |
+|---|---|---|
+| 1.2.0: Nutzungsstufe zeigt den Verbrauch im laufenden Monat | fertig | phpcs, Syntax; **nicht im Browser** |
+| 1.2.0: 429 mit `reason: monthly_quota` → Besucher lesen „später erneut versuchen“ | fertig | phpcs |
+| 1.2.1: Herkunft und Token im `permission_callback` (`check_visitor_permission`, `check_origin_permission`), kein `__return_true` mehr; Ratenlimits bleiben im Callback (WordPress ruft Permission-Callbacks auch für den `Allow`-Header auf) | fertig | phpcs; **nicht live** |
+| 1.2.1: `client.js` versteht eine JSON-Ablehnung vor dem Stream, erneuert abgelaufene Token einmal | fertig | Syntax; **nicht im Browser** |
+| 1.2.1: `readme.txt` nennt Nutzung und Kosten des API-Dienstes | fertig | – |
+
+Nach dem Update auf 1.2.1 den Seiten-Cache leeren: Zwischengespeicherte Seiten laden sonst das
+alte Skript, und eine Ablehnung zeigt dort nur die allgemeine Fehlermeldung.
+
+## Einreichung bei wordpress.org
+
+Eingereicht am 16.09.2026 als 1.0.0, Konto **bluebranch**, Slug `bluebranch-chatbot`. Die Mails
+gehen an **admin@bluebranch.de**. Automatische Vorprüfung vom 18.09.2026 („Review in Progress:
+BlueBranch Chatbot“) bemängelte `permission_callback => '__return_true'` und mitgelieferte
+Übersetzungsdateien – beides mit 1.2.1 behoben. Ohne Antwort im Thread wird die Einreichung
+drei Monate nach der Vorprüfung abgelehnt (Mitte Dezember 2026).
+
+Das Paket für wordpress.org wird als **1.0.0** hochgeladen (erste Veröffentlichung im
+Verzeichnis), gebaut aus dem Tag `1.2.1`:
+
+1. `git archive 1.2.1`, darin `composer install --no-dev --optimize-autoloader`
+2. Entfernen: `docs/`, `README.md`, `phpcs.xml.dist`, versteckte Dateien,
+   `languages/*.po`, `*.mo`, `*.json` (nur die `.pot` bleibt)
+3. Plugin-Header, `VERSION` und `Stable tag` auf 1.0.0; Changelog und Upgrade Notice nur
+   „1.0.0 – First release“
+4. Hochladen unter wordpress.org/plugins/developers/add, danach im Mail-Thread antworten
+
+Offen: Upload des Pakets und Antwort im Thread.
 
 ## Was 1.1.0 enthält
 
