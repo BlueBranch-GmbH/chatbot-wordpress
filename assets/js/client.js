@@ -261,13 +261,37 @@
 					headers: headers,
 					body: JSON.stringify( params )
 				} ).then( function ( response ) {
+					var type = response.headers.get( 'Content-Type' ) || '';
+
+					// Origin and token are checked before the stream opens, so
+					// such a refusal comes back as a plain REST error in JSON.
+					if ( ! response.ok && -1 !== type.indexOf( 'application/json' ) ) {
+						return response.json().then( function ( data ) {
+							if ( attempt !== controller || finished ) {
+								return null;
+							}
+
+							// An aged-out token is replaced once, as in the stream.
+							if ( data && 'bluebranch_chatbot_token' === data.code && ! retriedToken ) {
+								retriedToken = true;
+								open( true );
+
+								return null;
+							}
+
+							finish( data && data.message ? data.message : strings.requestError );
+
+							return null;
+						} );
+					}
+
 					if ( ! response.body ) {
 						finish( strings.requestError );
 
 						return null;
 					}
 
-					// Refusals arrive as an event stream too, with a 4xx status.
+					// Other refusals arrive as an event stream, with a 4xx status.
 					return read( response, attempt );
 				} );
 			} ).catch( function () {

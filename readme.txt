@@ -4,7 +4,7 @@ Tags: ai, chatbot, search, assistant, gdpr
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,8 @@ The AI quotes your pages and names its sources. It has no general knowledge to f
 == External services ==
 
 This plugin relies on the BlueBranch Chatbot API at `https://api.chatbot.bluebranch.de` to build the knowledge base and to generate answers. Without an account and an API key from that service, the plugin does nothing.
+
+**Usage and cost:** An account is free and includes 100 answers per month (5 per minute). Larger quotas (Pro, Expert, Enterprise) are paid plans arranged on request by e-mail to hello@bluebranch.de; nothing is sold inside the plugin. Training content is unlimited in every plan, and no feature of the plugin is locked.
 
 **What is sent, and when:**
 
@@ -146,6 +148,11 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.2.1 =
+* The public REST routes check origin and visitor token in their permission callback instead of inside the callback. Rate limits stay in the callback, because WordPress also runs permission callbacks to build the Allow header.
+* The chat script understands such a refusal before the stream opens and replaces an aged-out token once, as before.
+* readme: usage and cost of the API service.
+
 = 1.2.0 =
 * The usage tier box on the admin screens also shows this month's usage, e.g. "12 of 100 requests used this month". Tiers are now Free, Pro, Expert and Enterprise, each with a monthly quota; numbers, prices and wording still come from the API.
 * When the monthly quota is used up, visitors read "please try again later" instead of "try again in a minute". The API names the reason (`rate_limit` or `monthly_quota`); tier, prices and contact address stay in the log and on the admin screens.
@@ -179,6 +186,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Visitor routes check origin and token in their permission callback. Clear the page cache so visitors get the updated chat script.
 
 = 1.2.0 =
 Shows this month's usage next to the usage tier and tells visitors to come back later once the monthly quota is used up.

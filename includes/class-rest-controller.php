@@ -103,7 +103,9 @@ class Rest_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_token' ),
-				'permission_callback' => '__return_true',
+				// Public by design: the token is what a visitor's browser needs to
+				// ask anything at all. Only pages of this site may fetch one.
+				'permission_callback' => array( $this, 'check_origin_permission' ),
 			)
 		);
 
@@ -116,7 +118,7 @@ class Rest_Controller {
 				// logs. GET stays for pages still cached with the 1.0 script.
 				'methods'             => WP_REST_Server::READABLE . ', ' . WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'stream_chat' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'check_visitor_permission' ),
 				'args'                => $prompt_args,
 			)
 		);
@@ -130,7 +132,7 @@ class Rest_Controller {
 				// logs. GET stays for pages still cached with the 1.0 script.
 				'methods'             => WP_REST_Server::READABLE . ', ' . WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'stream_generate' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'check_visitor_permission' ),
 				'args'                => $prompt_args,
 			)
 		);
@@ -141,7 +143,7 @@ class Rest_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'generate_search' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'check_visitor_permission' ),
 				'args'                => $prompt_args,
 			)
 		);
@@ -152,7 +154,7 @@ class Rest_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'save_feedback' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'check_visitor_permission' ),
 				'args'                => array(
 					'ref'               => array(
 						'required' => true,
@@ -343,16 +345,9 @@ class Rest_Controller {
 	/**
 	 * Hands out a fresh token.
 	 *
-	 * @param WP_REST_Request $request The request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_token( WP_REST_Request $request ) {
-		$cross_site = $this->cross_site_refusal( $request );
-
-		if ( null !== $cross_site ) {
-			return $cross_site;
-		}
-
+	public function get_token() {
 		if ( ! Rate_Limiter::allow( 'token', 60, MINUTE_IN_SECONDS ) ) {
 			return new WP_REST_Response( array( 'message' => __( 'Too many requests.', 'bluebranch-chatbot' ) ), 429 );
 		}
@@ -462,12 +457,13 @@ class Rest_Controller {
 	private function stream( WP_REST_Request $request, $mode ) {
 		Sse::start();
 
-		$refusal = $this->public_request_refusal( $request );
+		$refusal = $this->public_request_refusal();
 
 		if ( null !== $refusal ) {
-			// Answered inside the stream rather than as an HTTP error: an
-			// EventSource shown a 403 only reports "connection failed", which
-			// tells the visitor nothing and the operator even less.
+			// Answered inside the stream rather than as an HTTP error, so the
+			// script shows the reason. Origin and token were already checked
+			// in check_visitor_permission(); what is left is rate limit and
+			// configuration.
 			Sse::error( $refusal->get_error_message(), 403, $refusal->get_error_code() );
 			exit;
 		}
@@ -510,8 +506,9 @@ class Rest_Controller {
 	/**
 	 * Stores a visitor's rating of an answer.
 	 *
-	 * Guarded like the answer routes: the origin check keeps other websites
-	 * out, the token and the counter keep one client from flooding the table.
+	 * Guarded like the answer routes: origin and token are checked in
+	 * check_visitor_permission(), the counter here keeps one client from
+	 * flooding the table.
 	 * The reference itself is what limits the feedback to answers this
 	 * browser was actually given.
 	 *
@@ -519,20 +516,6 @@ class Rest_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_feedback( WP_REST_Request $request ) {
-		$cross_site = $this->cross_site_refusal( $request );
-
-		if ( null !== $cross_site ) {
-			return $cross_site;
-		}
-
-		if ( ! Answer_Token::verify( $this->request_token( $request ) ) ) {
-			return new WP_Error(
-				'bluebranch_chatbot_token',
-				__( 'Your session has expired. Please reload the page and try again.', 'bluebranch-chatbot' ),
-				array( 'status' => 403 )
-			);
-		}
-
 		if ( ! Answer_Log::feedback_enabled() ) {
 			return new WP_Error( 'bluebranch_chatbot_feedback_off', __( 'Feedback is switched off.', 'bluebranch-chatbot' ), array( 'status' => 403 ) );
 		}
@@ -561,7 +544,7 @@ class Rest_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function generate_search( WP_REST_Request $request ) {
-		$refusal = $this->public_request_refusal( $request );
+		$refusal = $this->public_request_refusal();
 
 		if ( null !== $refusal ) {
 			return $refusal;
@@ -813,25 +796,35 @@ class Rest_Controller {
 	}
 
 	/**
-	 * Whether the caller may manage the knowledge base.
+	 * Permission check of the token route: only pages of this site.
 	 *
-	 * @return bool
+	 * The route is public on purpose -- every visitor needs a token before
+	 * asking anything. What it must not be is usable by other websites
+	 * through their visitors' browsers. The rate limit stays in the
+	 * callback: WordPress also runs permission callbacks to build the Allow
+	 * header, which would count a request twice.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return true|WP_Error
 	 */
-	public function check_manage_permission() {
-		return current_user_can( 'manage_options' );
+	public function check_origin_permission( WP_REST_Request $request ) {
+		$cross_site = $this->cross_site_refusal( $request );
+
+		return null === $cross_site ? true : $cross_site;
 	}
 
 	/**
-	 * Why a public request must be turned away, or null when it may proceed.
+	 * Permission check of the visitor routes: answers and feedback.
 	 *
-	 * The error code matters: a token that has simply aged out is not a
-	 * failure the visitor should be told about, it is one the script fixes by
-	 * fetching a new one. Only a code distinguishes that from a real refusal.
+	 * Visitors are not logged in, so there is no capability to check.
+	 * Instead a request must come from a page of this site and carry a
+	 * token issued by the token route a short while ago. Rate limits and
+	 * the configuration check stay in the callbacks, see above.
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_Error|null
+	 * @return true|WP_Error
 	 */
-	private function public_request_refusal( WP_REST_Request $request ) {
+	public function check_visitor_permission( WP_REST_Request $request ) {
 		$cross_site = $this->cross_site_refusal( $request );
 
 		if ( null !== $cross_site ) {
@@ -846,6 +839,29 @@ class Rest_Controller {
 			);
 		}
 
+		return true;
+	}
+
+	/**
+	 * Whether the caller may manage the knowledge base.
+	 *
+	 * @return bool
+	 */
+	public function check_manage_permission() {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Why a public request must be turned away, or null when it may proceed.
+	 *
+	 * Origin and token are settled before this, in check_visitor_permission().
+	 * What is left are the rate limits and whether the plugin is configured
+	 * at all -- both kept out of the permission callback, because WordPress
+	 * also runs that to build the Allow header and would count twice.
+	 *
+	 * @return WP_Error|null
+	 */
+	private function public_request_refusal() {
 		/**
 		 * Filters how many answers one client may ask for per minute.
 		 *
