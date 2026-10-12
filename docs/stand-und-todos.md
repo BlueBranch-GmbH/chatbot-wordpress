@@ -6,10 +6,10 @@ Stand: 06.10.2026, Version **1.1.0** (Tag `1.1.0`). Anforderungen und Sicherheit
 
 | Repository | Stand |
 |---|---|
-| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.1.0 |
-| `BlueBranch-GmbH/chatbot-contao` | 1.3.0 |
-| `spardorf-chatbot-api` | 0.0.55 |
-| `spardorf-chatbot-frontend` | 0.1.28 |
+| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.0 |
+| `BlueBranch-GmbH/chatbot-contao` | 1.4.0 |
+| `spardorf-chatbot-api` | 0.0.56 |
+| `spardorf-chatbot-frontend` | 0.1.29 |
 
 ## Was 1.1.0 enthält
 

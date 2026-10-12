@@ -4,7 +4,7 @@ Tags: ai, chatbot, search, assistant, gdpr
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,6 +146,10 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.2.0 =
+* The usage tier box on the admin screens also shows this month's usage, e.g. "12 of 100 requests used this month". Tiers are now Free, Pro, Expert and Enterprise, each with a monthly quota; numbers, prices and wording still come from the API.
+* When the monthly quota is used up, visitors read "please try again later" instead of "try again in a minute". The API names the reason (`rate_limit` or `monthly_quota`); tier, prices and contact address stay in the log and on the admin screens.
+
 = 1.1.0 =
 * Questions and answers can be saved for evaluation (off by default), without IP address, browser or user; e-mail addresses, phone numbers and IBANs typed by visitors are masked. Retention in days, cleaned up daily.
 * Optional feedback under every answer: thumbs up or down, with a short comment field on thumbs down. Feedback is kept together with its question and answer even while saving is off.
@@ -175,6 +179,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Shows this month's usage next to the usage tier and tells visitors to come back later once the monthly quota is used up.
 
 = 1.1.0 =
 Saving questions, feedback, chat export and additional content. Two new database tables are created on update.

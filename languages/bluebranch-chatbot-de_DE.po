@@ -1497,3 +1497,17 @@ msgstr "Das Dokument ist entpackt zu groß."
 #: admin/class-admin.php
 msgid "%d requests per minute."
 msgstr "%d Anfragen je Minute."
+
+#. translators: 1: requests used this month, 2: monthly quota.
+#: admin/class-admin.php
+msgid "%1$s of %2$s requests used this month."
+msgstr "%1$s von %2$s Anfragen in diesem Monat verbraucht."
+
+#. translators: %s: requests used this month.
+#: admin/class-admin.php
+msgid "%s requests this month, no monthly limit."
+msgstr "%s Anfragen in diesem Monat, ohne Monatslimit."
+
+#: includes/class-api-client.php
+msgid "The chat is not available at the moment. Please try again later."
+msgstr "Der Chat steht im Moment nicht zur Verfügung. Bitte versuchen Sie es später erneut."

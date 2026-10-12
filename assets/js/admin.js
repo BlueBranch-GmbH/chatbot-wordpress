@@ -299,6 +299,20 @@
 	 * The usage tier of the stored key.
 	 * ---------------------------------------------------------------- */
 
+	/**
+	 * A count with the separators of the admin's locale.
+	 *
+	 * @param {number} value Count.
+	 * @return {string} Formatted count.
+	 */
+	function formatNumber( value ) {
+		try {
+			return Number( value ).toLocaleString( document.documentElement.lang || undefined );
+		} catch ( e ) {
+			return String( value );
+		}
+	}
+
 	function initTier() {
 		var box = document.getElementById( 'bluebranch-chatbot-tier' );
 
@@ -337,6 +351,19 @@
 
 			if ( text ) {
 				box.appendChild( document.createTextNode( ' ' + text ) );
+			}
+
+			// The month's usage, from the numbers. Older API versions send
+			// none, and then there is nothing to say.
+			if ( 'number' === typeof data.usedThisMonth ) {
+				box.appendChild( document.createElement( 'br' ) );
+				box.appendChild( document.createTextNode(
+					'number' === typeof data.requestsPerMonth
+						? strings.tierMonth
+							.replace( '%1$s', formatNumber( data.usedThisMonth ) )
+							.replace( '%2$s', formatNumber( data.requestsPerMonth ) )
+						: strings.tierMonthOpen.replace( '%s', formatNumber( data.usedThisMonth ) )
+				) );
 			}
 
 			box.hidden = false;

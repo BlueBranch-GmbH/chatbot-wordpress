@@ -300,6 +300,10 @@ class Admin {
 					'entries'           => __( 'entries', 'bluebranch-chatbot' ),
 					/* translators: %d: requests per minute. */
 					'tierRequests'      => __( '%d requests per minute.', 'bluebranch-chatbot' ),
+					/* translators: 1: requests used this month, 2: monthly quota. */
+					'tierMonth'         => __( '%1$s of %2$s requests used this month.', 'bluebranch-chatbot' ),
+					/* translators: %s: requests used this month. */
+					'tierMonthOpen'     => __( '%s requests this month, no monthly limit.', 'bluebranch-chatbot' ),
 					/* translators: 1: number shown, 2: number in total. */
 					'filtered'          => __( '%1$d of %2$d entries', 'bluebranch-chatbot' ),
 					/* translators: 1: posts done, 2: posts in total. */

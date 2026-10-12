@@ -1088,3 +1088,17 @@ msgstr ""
 #: admin/class-admin.php
 msgid "%d requests per minute."
 msgstr ""
+
+#. translators: 1: requests used this month, 2: monthly quota.
+#: admin/class-admin.php
+msgid "%1$s of %2$s requests used this month."
+msgstr ""
+
+#. translators: %s: requests used this month.
+#: admin/class-admin.php
+msgid "%s requests this month, no monthly limit."
+msgstr ""
+
+#: includes/class-api-client.php
+msgid "The chat is not available at the moment. Please try again later."
+msgstr ""

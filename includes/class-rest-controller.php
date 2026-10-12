@@ -924,10 +924,11 @@ class Rest_Controller {
 	 * @return WP_Error
 	 */
 	private function public_error( WP_Error $error ) {
-		$status = (int) $error->get_error_data( 'status' );
+		$data   = (array) $error->get_error_data();
+		$status = isset( $data['status'] ) ? (int) $data['status'] : 0;
 
 		$message = 429 === $status
-			? __( 'There are too many open requests right now. Please try again in a minute.', 'bluebranch-chatbot' )
+			? Api_Client::limit_message( isset( $data['reason'] ) ? (string) $data['reason'] : '' )
 			: __( 'The request could not be answered.', 'bluebranch-chatbot' );
 
 		return new WP_Error( 'bluebranch_chatbot_failed', $message, array( 'status' => 502 ) );

@@ -332,13 +332,20 @@ Anfragen zu stellen.
 ## Nutzungsstufe
 
 Oben auf der Übersicht und in den Einstellungen steht, in welcher Stufe der hinterlegte Zugang
-läuft — *Free*, *Pro* oder *Expert* — samt Anfragekontingent.
+läuft — *Free*, *Pro*, *Expert* oder *Enterprise* — samt Anfragekontingent je Minute und dem
+Verbrauch im laufenden Kalendermonat.
 
 Die Zahlen stehen bewusst **nicht** in dieser Erweiterung. Sie kommen zur Laufzeit von der API.
 Schickt diese einen fertigen Hinweistext mit, wird genau der angezeigt; ändert sich also
 Kontingent, Wortlaut oder Anschrift, genügt ein Deployment der API und die Anzeige folgt, ohne
 dass eine neue Fassung der Erweiterung ausgeliefert werden müsste. Kommt kein Hinweistext, wird
 der Satz aus Stufenname und Kontingent gebildet — beides ebenfalls von der API.
+
+Ist das Kontingent erschöpft, antwortet die API mit 429 und nennt in `reason` den Grund:
+`rate_limit` (Minutenlimit) oder `monthly_quota` (Monatskontingent). Besucher lesen danach
+„in einer Minute erneut versuchen" bzw. „später erneut versuchen" — nie Stufe, Preise oder
+Anschrift; die stehen nur im Log und auf den Admin-Seiten. Gebucht wird nicht über eine
+Website, sondern auf Anfrage an hello@bluebranch.de.
 
 ## Trainierte Inhalte einsehen
 

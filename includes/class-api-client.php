@@ -271,7 +271,14 @@ class Api_Client {
 				)
 			);
 
-			return new WP_Error( 'bluebranch_chatbot_api_error', $message, array( 'status' => $status ) );
+			return new WP_Error(
+				'bluebranch_chatbot_api_error',
+				$message,
+				array(
+					'status' => $status,
+					'reason' => isset( $data['reason'] ) && is_string( $data['reason'] ) ? $data['reason'] : '',
+				)
+			);
 		}
 
 		Logger::clear_last_error();
@@ -577,6 +584,26 @@ class Api_Client {
 	}
 
 	/**
+	 * What a visitor reads when the API turned a question down over quota.
+	 *
+	 * The API names the reason: a full minute clears itself, a used-up
+	 * monthly quota only when the next month starts. Telling a visitor to
+	 * try again in a minute would be wrong for the second case. Neither
+	 * message names the plan or the contact address -- that is the
+	 * operator's business, and it sits in the log and on the admin screens.
+	 *
+	 * @param string $reason `rate_limit`, `monthly_quota` or empty.
+	 * @return string
+	 */
+	public static function limit_message( $reason ) {
+		if ( 'monthly_quota' === $reason ) {
+			return __( 'The chat is not available at the moment. Please try again later.', 'bluebranch-chatbot' );
+		}
+
+		return __( 'There are too many open requests right now. Please try again in a minute.', 'bluebranch-chatbot' );
+	}
+
+	/**
 	 * Turns a rejected stream into a log entry and a neutral message.
 	 *
 	 * @return void
@@ -584,9 +611,14 @@ class Api_Client {
 	private function report_stream_rejection() {
 		$detail = trim( wp_strip_all_tags( $this->stream_error_body ) );
 		$parsed = json_decode( $detail, true );
+		$reason = '';
 
 		if ( is_array( $parsed ) && isset( $parsed['message'] ) && is_string( $parsed['message'] ) ) {
 			$detail = $parsed['message'];
+		}
+
+		if ( is_array( $parsed ) && isset( $parsed['reason'] ) && is_string( $parsed['reason'] ) ) {
+			$reason = $parsed['reason'];
 		}
 
 		Logger::error(
@@ -599,7 +631,7 @@ class Api_Client {
 		);
 
 		$message = 429 === $this->stream_status
-			? __( 'There are too many open requests right now. Please try again in a minute.', 'bluebranch-chatbot' )
+			? self::limit_message( $reason )
 			: __( 'The request could not be answered.', 'bluebranch-chatbot' );
 
 		Sse::error( $message, $this->stream_status );
@@ -616,9 +648,10 @@ class Api_Client {
 		$result = $this->generate_search( array_intersect_key( $payload, array_flip( array( 'prompt', 'language' ) ) ) );
 
 		if ( is_wp_error( $result ) ) {
-			$status  = (int) $result->get_error_data( 'status' );
+			$data    = (array) $result->get_error_data();
+			$status  = isset( $data['status'] ) ? (int) $data['status'] : 0;
 			$message = 429 === $status
-				? __( 'There are too many open requests right now. Please try again in a minute.', 'bluebranch-chatbot' )
+				? self::limit_message( isset( $data['reason'] ) ? (string) $data['reason'] : '' )
 				: __( 'The request could not be answered.', 'bluebranch-chatbot' );
 
 			Sse::error( $message, $status );
