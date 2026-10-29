@@ -540,7 +540,7 @@ class Api_Client {
 			$data = array();
 
 			foreach ( explode( "\n", $block ) as $line ) {
-				if ( str_starts_with( $line, 'data:' ) ) {
+				if ( 0 === strpos( $line, 'data:' ) ) {
 					$data[] = ltrim( substr( $line, 5 ), ' ' );
 				}
 			}

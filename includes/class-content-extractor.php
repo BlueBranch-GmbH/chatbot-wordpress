@@ -435,7 +435,7 @@ class Content_Extractor {
 			$value = trim( (string) get_post_meta( $post->ID, $meta_key, true ) );
 
 			// SEO titles are templates; one still holding placeholders is of no use.
-			if ( '' !== $value && ! str_contains( $value, '%%' ) && ! str_contains( $value, '%title%' ) ) {
+			if ( '' !== $value && false === strpos( $value, '%%' ) && false === strpos( $value, '%title%' ) ) {
 				return $value;
 			}
 		}
@@ -453,7 +453,7 @@ class Content_Extractor {
 		foreach ( array( '_yoast_wpseo_metadesc', 'rank_math_description', '_seopress_titles_desc' ) as $meta_key ) {
 			$value = trim( (string) get_post_meta( $post->ID, $meta_key, true ) );
 
-			if ( '' !== $value && ! str_contains( $value, '%%' ) ) {
+			if ( '' !== $value && false === strpos( $value, '%%' ) ) {
 				return $value;
 			}
 		}

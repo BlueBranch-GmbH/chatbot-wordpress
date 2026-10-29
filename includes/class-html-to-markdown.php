@@ -252,7 +252,7 @@ class Html_To_Markdown {
 		}
 
 		// In-page and script targets carry no information for a knowledge base.
-		if ( '' === $href || str_starts_with( $href, '#' ) || str_starts_with( $href, 'javascript:' ) ) {
+		if ( '' === $href || 0 === strpos( $href, '#' ) || 0 === strpos( $href, 'javascript:' ) ) {
 			return $text;
 		}
 

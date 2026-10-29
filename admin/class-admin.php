@@ -384,7 +384,7 @@ class Admin {
 
 		$screen = get_current_screen();
 
-		if ( ! $screen || ! str_contains( (string) $screen->id, 'bluebranch-chatbot' ) ) {
+		if ( ! $screen || false === strpos( (string) $screen->id, 'bluebranch-chatbot' ) ) {
 			return;
 		}
 

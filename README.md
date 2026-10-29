@@ -731,6 +731,10 @@ GPL-2.0-or-later – siehe [LICENSE.txt](LICENSE.txt).
 
 ## Changes
 
+### 1.3.2 - 2026-10-29
+
+- Läuft unter PHP 7.4 ohne `str_starts_with()` und `str_contains()` (PHP 8): sechs Stellen nutzen jetzt `strpos()`. Auslöser: Prüfung durch das wordpress.org-Team; Verhalten unverändert
+
 ### 1.3.1 - 2026-10-29
 
 - Die Filter- und Export-Abfragen von „Fragen & Feedback“ nutzen einen festen SQL-Text mit Platzhaltern statt einer aus Variablen zusammengesetzten Bedingung (Plugin Check: `UnescapedDBParameter`); Verhalten unverändert. `Answer_Log::where()` heißt jetzt `Answer_Log::where_args()` und liefert nur die Werte

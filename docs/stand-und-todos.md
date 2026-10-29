@@ -1,12 +1,12 @@
 # Stand und offene ToDos
 
-Stand: 29.10.2026, Version **1.3.1** (Tags `1.3.0` und `1.3.1`; wordpress.org bekommt weiterhin ein Paket als 1.0.0). Anforderungen und Sicherheitsprüfung:
+Stand: 29.10.2026, Version **1.3.2** (Tags `1.3.0`, `1.3.1`, `1.3.2`; wordpress.org bekommt weiterhin ein Paket als 1.0.0). Anforderungen und Sicherheitsprüfung:
 [ausbau-2026-10.md](ausbau-2026-10.md). Gemeinsamer Plan aller Repositories:
 `chatbot-contao` → `docs/ausbau-2026-10.md`.
 
 | Repository | Stand |
 |---|---|
-| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.3.1 |
+| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.3.2 |
 | `BlueBranch-GmbH/chatbot-contao` | 1.4.0 |
 | `spardorf-chatbot-api` | 0.0.56 |
 | `spardorf-chatbot-frontend` | 0.1.29 |
