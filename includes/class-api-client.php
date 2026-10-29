@@ -124,6 +124,101 @@ class Api_Client {
 	}
 
 	/**
+	 * Turns a recording into text.
+	 *
+	 * The recording is held in memory only and sent on as a multipart upload;
+	 * neither it nor the text that comes back is written to the log or kept. A
+	 * request of its own rather than request(): the answer to a recording that
+	 * is too long or in the wrong format is the visitor's business, not an API
+	 * error the administrator needs to see in the admin notice.
+	 *
+	 * @param string $audio    Raw bytes of the recording.
+	 * @param string $mime     Media type, one of Voice::mime_types().
+	 * @param string $language Two-letter language code.
+	 * @return array|WP_Error Text on success; on failure the error data carries
+	 *                        status, reason and, for a recording that is too
+	 *                        long, maxSeconds.
+	 */
+	public function transcribe( $audio, $mime, $language ) {
+		$api_key = Options::api_key();
+
+		if ( '' === trim( $api_key ) ) {
+			return new WP_Error(
+				'bluebranch_chatbot_no_api_key',
+				__( 'No API key has been stored yet.', 'bluebranch-chatbot' )
+			);
+		}
+
+		if ( ! in_array( $mime, Voice::mime_types(), true ) || 1 !== preg_match( '/^[a-z]{2}$/', (string) $language ) ) {
+			return new WP_Error( 'bluebranch_chatbot_bad_audio', '', array( 'status' => 415 ) );
+		}
+
+		// The WordPress HTTP API has no multipart helper, so the body is built
+		// by hand. The boundary is random and cannot occur in the audio by
+		// chance; the media type was checked against a list above, so nothing
+		// a visitor sent can end up in a header line.
+		$boundary = 'bbchatbot' . wp_generate_password( 24, false, false );
+		$eol      = "\r\n";
+		$body     = '--' . $boundary . $eol
+			. 'Content-Disposition: form-data; name="language"' . $eol . $eol . $language . $eol
+			. '--' . $boundary . $eol
+			. 'Content-Disposition: form-data; name="audio"; filename="recording"' . $eol
+			. 'Content-Type: ' . $mime . $eol . $eol
+			. $audio . $eol
+			. '--' . $boundary . '--' . $eol;
+
+		$response = wp_remote_post(
+			$this->base() . '/api/v1/chatbot-ai/transcribe',
+			array(
+				'timeout'    => 30,
+				'user-agent' => $this->user_agent(),
+				'headers'    => array(
+					'x-api-key'    => $api_key,
+					'Accept'       => 'application/json',
+					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+				),
+				'body'       => $body,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			Logger::error( __( 'The speech recognition of the Chatbot API could not be reached.', 'bluebranch-chatbot' ) );
+
+			return new WP_Error( 'bluebranch_chatbot_unreachable', '', array( 'status' => 503 ) );
+		}
+
+		$status = (int) wp_remote_retrieve_response_code( $response );
+		$data   = json_decode( wp_remote_retrieve_body( $response ), true );
+		$data   = is_array( $data ) ? $data : array();
+
+		if ( $status >= 400 ) {
+			if ( $status >= 500 ) {
+				Logger::error(
+					sprintf(
+						/* translators: %d: HTTP status code. */
+						__( 'The speech recognition of the Chatbot API answered with HTTP %d.', 'bluebranch-chatbot' ),
+						$status
+					)
+				);
+			}
+
+			return new WP_Error(
+				'bluebranch_chatbot_api_error',
+				'',
+				array(
+					'status'     => $status,
+					'reason'     => isset( $data['reason'] ) && is_string( $data['reason'] ) ? $data['reason'] : '',
+					'maxSeconds' => isset( $data['maxSeconds'] ) ? (int) $data['maxSeconds'] : 0,
+				)
+			);
+		}
+
+		return array(
+			'text' => isset( $data['text'] ) && is_string( $data['text'] ) ? trim( $data['text'] ) : '',
+		);
+	}
+
+	/**
 	 * Asks for an answer without streaming.
 	 *
 	 * @param array $payload Prompt and language.

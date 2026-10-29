@@ -4,7 +4,8 @@
  *
  * Copy this file to your theme as bluebranch-chatbot/search.php to change it.
  * Available in $args: id, query, show_form, questions, suggestions,
- * placeholder, button, stop, style.
+ * placeholder, button, stop, style, voice (false or an array with maxSeconds
+ * and language).
  *
  * @package BlueBranch\Chatbot
  */
@@ -17,6 +18,7 @@ $bluebranch_chatbot_config = array(
 	'questions' => array_values( (array) $args['questions'] ),
 	'askLabel'  => $args['button'],
 	'stopLabel' => $args['stop'],
+	'voice'     => $args['voice'],
 );
 ?>
 <div class="chatbot-generate-search-container<?php echo '' === $args['query'] ? ' chatbot-empty' : ''; ?>"
@@ -38,6 +40,11 @@ $bluebranch_chatbot_config = array(
 					name="question" autocomplete="off"
 					value="<?php echo esc_attr( $args['query'] ); ?>"
 					placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>">
+				<?php if ( $args['voice'] ) : ?>
+					<button type="button" class="chatbot-ask-voice" hidden
+						aria-label="<?php esc_attr_e( 'Ask by voice', 'bluebranch-chatbot' ); ?>"
+						title="<?php esc_attr_e( 'Ask by voice', 'bluebranch-chatbot' ); ?>"></button>
+				<?php endif; ?>
 			</div>
 			<div class="chatbot-field chatbot-field--submit">
 				<button type="submit" class="chatbot-submit"><?php echo esc_html( $args['button'] ); ?></button>

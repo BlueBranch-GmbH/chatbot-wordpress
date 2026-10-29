@@ -544,6 +544,36 @@ die sich darauf stützen, zeigen deshalb keinen Link. Höchstens 200.000 Zeichen
 Speichern trainiert sofort, Ausschalten oder Löschen entfernt den Eintrag aus der Wissensbasis.
 Wird eine Datei in der Mediathek ersetzt, überträgt der tägliche Lauf sie neu.
 
+## Spracheingabe
+
+Optional, standardmäßig aus: *BlueBranch Chatbot → Einstellungen → Spracheingabe → Spracheingabe
+anbieten*. Dann erscheint ein Mikrofon-Knopf im Chat-Fenster und im Fragefeld. Der Besucher
+spricht, sieht dabei die Pegel-Wellen und die Aufnahmedauer, beendet mit einem zweiten Klick und
+bekommt die Antwort wie auf eine getippte Frage. Abbrechen geht mit dem ✕ oder mit Escape.
+
+- **Voraussetzungen:** HTTPS (oder `localhost`), ein Browser mit `MediaRecorder` und ein Tarif mit
+  Spracherkennung (`transcriptionEnabled` in der Antwort von `GET /user/me/tier`). Fehlt eines davon,
+  bleibt der Knopf einfach verborgen.
+- **Länge:** Die Aufnahme endet von selbst nach der Dauer, die der Tarif erlaubt
+  (`maxAudioSeconds`, gemerkt für 10 Minuten).
+- **Stille wird nicht gesendet:** Liegt der Pegel durchgehend unter der Schwelle, geht nichts an die
+  API – die Spracherkennung erfindet bei Stille gern Sätze.
+- **Kontingent:** Eine gesprochene Frage zählt doppelt – einmal Spracherkennung, einmal Antwort.
+- **Datenschutz:** Die Aufnahme geht aus dem Speicher des Browsers an die eigene Route
+  `POST /bluebranch-chatbot/v1/transcribe`, von dort an die API und wird verworfen. Weder der Server
+  noch die API speichert sie. Bitte in der Datenschutzerklärung erwähnen.
+- **Schutz der Route:** wie die übrigen Besucher-Routen (Herkunft, Token), dazu 20 Aufnahmen je Minute
+  und Besucher sowie 200 je Minute für die ganze Website; erlaubt sind nur Audio-Typen, höchstens 4 MB.
+- **Einzelne Stelle ohne Mikrofon:** Shortcode-Attribut `voice="no"` (Widget und Fragefeld).
+
+## Erste Schritte (Einrichtungs-Assistent)
+
+Der erste Menüpunkt führt in fünf Schritten zum laufenden Chatbot: Schlüssel eintragen (wird geprüft,
+bevor er übernommen wird – ein abgelehnter Schlüssel ersetzt den alten nicht), Inhalte trainieren
+(derselbe Lauf wie unter *Inhalte trainieren*), Chat-Button einschalten, eine Testfrage im echten
+Fragefeld stellen und die Extras (Spracheingabe, Bewertung) schalten. Erledigte Schritte sind grün
+markiert.
+
 ## Datenschutz und Hosting
 
 - **Hosting in Deutschland.** Server und Datenverarbeitung liegen ausschließlich in Deutschland.
@@ -641,6 +671,21 @@ Tick *Exclude from AI answers* in the **BlueBranch Chatbot** box on the post edi
 hierarchical post type the setting is inherited by every child page, and the affected entries are
 withdrawn from the knowledge base straight away rather than at the next clean-up.
 
+## Voice input
+
+Optional and off by default: *BlueBranch Chatbot → Settings → Voice input*. A microphone button
+appears in the chat window and in the question field; the visitor speaks, sees the level while
+recording and gets the answer like for a typed question. It needs HTTPS, a browser with
+`MediaRecorder` and a plan with speech recognition, otherwise the button stays hidden. The
+recording goes from the browser to this site's `POST /bluebranch-chatbot/v1/transcribe`, from
+there to the API, and is discarded; complete silence is never sent. A spoken question counts twice
+towards the quota. The shortcode attribute `voice="no"` hides the button in one placement.
+
+## Getting started screen
+
+The first menu entry walks through key (checked before it is kept), training run, chat button, a
+test question in the real field and the extras.
+
 ## Privacy and hosting
 
 - **Hosted in Germany.** Servers and data processing are located in Germany only.
@@ -685,6 +730,13 @@ Das Team von [www.bluebranch.de](https://www.bluebranch.de/)
 GPL-2.0-or-later – siehe [LICENSE.txt](LICENSE.txt).
 
 ## Changes
+
+### 1.3.0 - 2026-10-29
+
+- Spracheingabe (optional, standardmäßig aus): Mikrofon-Knopf im Chat-Fenster und im Fragefeld, Pegel-Wellen und Dauer während der Aufnahme, Abbrechen mit ✕ oder Escape, Stille wird nicht gesendet; neue Route `POST /transcribe` (Herkunft, Token, Ratenlimit), Shortcode-Attribut `voice="no"`
+- „Erste Schritte" als erster Menüpunkt: Schlüssel (wird vor dem Speichern geprüft), Training, Chat-Button, Testfrage und Extras auf einer Seite
+- Neues Aussehen des Chat-Fensters: Kopfzeile mit Avatar und Verlauf, Vorschlags-Pills, runde Eingabe; die Farben folgen der Akzentfarbe
+- Einstellungs-Abschnitt „Spracheingabe"; `Options::set()` schreibt Listen-Einstellungen unverändert zurück
 
 ### 1.0.0 - 2026-09-16
 

@@ -1,15 +1,35 @@
 # Stand und offene ToDos
 
-Stand: 12.10.2026, Version **1.2.2** (Tag `1.2.2`). Anforderungen und Sicherheitsprüfung:
+Stand: 29.10.2026, Version **1.3.0** (lokal committet, noch nicht getaggt; letzter Tag `1.2.2`). Anforderungen und Sicherheitsprüfung:
 [ausbau-2026-10.md](ausbau-2026-10.md). Gemeinsamer Plan aller Repositories:
 `chatbot-contao` → `docs/ausbau-2026-10.md`.
 
 | Repository | Stand |
 |---|---|
-| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.2.2 |
+| `BlueBranch-GmbH/chatbot-wordpress` (dieses) | 1.3.0 (lokal) |
 | `BlueBranch-GmbH/chatbot-contao` | 1.4.0 |
 | `spardorf-chatbot-api` | 0.0.56 |
 | `spardorf-chatbot-frontend` | 0.1.29 |
+
+## Was 1.3.0 enthält
+
+| Bereich | Stand | Getestet |
+|---|---|---|
+| Spracheingabe: Mikrofon im Chat-Fenster und im Fragefeld, Wellen, Abbruch, Stille wird nicht gesendet; Einstellung `voice_enabled`, Shortcode-Attribut `voice="no"` | fertig | Chrome (headless, Fake-Mikrofon mit gesprochener WAV) gegen die echte API: Frage → Text → Antwort, Abbruch, Stille, verweigertes Mikrofon, ohne `MediaRecorder`; mobil (390 px) |
+| Route `POST /transcribe` (Herkunft, Token, Ratenlimit 20/min je Besucher, 200/min je Website, MIME-Liste, 4 MB) | fertig | curl: WAV, m4a, falscher Typ (415), zu groß (413), keine Datei (400), Schalter aus (403), fremde Herkunft (403), ohne Token (403) |
+| „Erste Schritte" als erster Menüpunkt (Schlüsselprüfung mit Rückfall auf den alten Schlüssel, Training, Chat-Button, Testfeld, Schalter) | fertig | Chrome gegen die lokale Instanz: abgelehnter und leerer Schlüssel, Schalter, Trainingslauf, Testfrage, deutsch |
+| Neues Aussehen des Chat-Fensters (nur das Widget; das Fragefeld bleibt themenfarben-neutral) | fertig | Chrome, Desktop und mobil |
+| Deutsche Übersetzung der neuen Texte | fertig | `msgfmt --check`, Seite auf Deutsch geprüft |
+
+**Nicht getestet:** Safari und Firefox (keine echte Hardware; Firefox nimmt als `audio/ogg` auf,
+Safari als `audio/mp4` – die Route nimmt beides, m4a wurde per curl geprüft), echte Mikrofone,
+Seiten-Cache-Plugins, Multisite. Die Zugriffsprüfung läuft über `localhost`; die Lando-Domain
+`wordpress-dev.lndo.site` wurde nicht verwendet.
+
+**Hinweis für die Entwicklungsumgebung:** Die Lando-Datei von `wordpress-dev` hatte den
+Datenbank-Port fest auf `33312` gelegt – derselbe Port wie bei `contao413`. Beim gleichzeitigen
+Betrieb blieb die Datenbank dadurch im falschen Netz hängen („Error establishing a database
+connection“). `.lando.yml` steht jetzt auf `portforward: true`.
 
 ## Was 1.2.0 bis 1.2.2 enthalten
 

@@ -64,6 +64,37 @@
 	}
 
 	/**
+	 * Posts a form (a recording, say) to one of the plugin's routes.
+	 *
+	 * Like the other calls it sends the token in a header and replaces it once
+	 * when it has aged out.
+	 *
+	 * @param {string}   path Route below the plugin namespace.
+	 * @param {FormData} body The fields.
+	 * @return {Promise<Response>} The response.
+	 */
+	function postForm( path, body ) {
+		function post( force ) {
+			return getToken( force ).then( function ( token ) {
+				var headers = { Accept: 'application/json' };
+
+				headers[ TOKEN_HEADER ] = token;
+
+				return window.fetch( settings.restUrl + path, {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: headers,
+					body: body
+				} );
+			} );
+		}
+
+		return post( false ).then( function ( response ) {
+			return 403 === response.status ? post( true ) : response;
+		} );
+	}
+
+	/**
 	 * Splits one server-sent-events block into its name and data.
 	 *
 	 * @param {string} block Lines of one event.
@@ -620,6 +651,7 @@
 		settings: settings,
 		strings: strings,
 		getToken: getToken,
+		postForm: postForm,
 		stream: stream,
 		readConfig: readConfig,
 		buildSourceLink: buildSourceLink,

@@ -72,6 +72,7 @@ class Options {
 			'log_enabled'         => false,
 			'log_retention_days'  => 180,
 			'feedback_enabled'    => false,
+			'voice_enabled'       => false,
 		);
 	}
 

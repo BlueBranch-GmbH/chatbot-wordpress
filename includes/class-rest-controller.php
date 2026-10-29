@@ -150,6 +150,16 @@ class Rest_Controller {
 
 		register_rest_route(
 			self::REST_NAMESPACE,
+			'/transcribe',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'transcribe' ),
+				'permission_callback' => array( $this, 'check_visitor_permission' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
 			'/feedback',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -897,6 +907,94 @@ class Rest_Controller {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Turns a spoken question into text.
+	 *
+	 * The browser sends the recording as the form field "audio". It is passed on
+	 * to the API from memory and neither kept nor logged.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function transcribe( WP_REST_Request $request ) {
+		if ( ! Voice::site_enabled() ) {
+			return new WP_Error( 'bluebranch_chatbot_voice_off', __( 'Voice input is switched off.', 'bluebranch-chatbot' ), array( 'status' => 403 ) );
+		}
+
+		if ( ! Rate_Limiter::allow( 'transcribe', 20, MINUTE_IN_SECONDS ) || ! Rate_Limiter::allow( 'transcribe-site', 200, MINUTE_IN_SECONDS, true ) ) {
+			return new WP_Error( 'bluebranch_chatbot_rate_limit', __( 'Too many requests.', 'bluebranch-chatbot' ), array( 'status' => 429 ) );
+		}
+
+		if ( ! Options::has_api_key() ) {
+			return new WP_Error( 'bluebranch_chatbot_voice_unavailable', __( 'Voice input is not available.', 'bluebranch-chatbot' ), array( 'status' => 503 ) );
+		}
+
+		$files = $request->get_file_params();
+		$file  = isset( $files['audio'] ) && is_array( $files['audio'] ) ? $files['audio'] : array();
+
+		if ( empty( $file['tmp_name'] ) || ! empty( $file['error'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
+			return new WP_Error( 'bluebranch_chatbot_no_audio', __( 'No recording received.', 'bluebranch-chatbot' ), array( 'status' => 400 ) );
+		}
+
+		if ( (int) $file['size'] > Voice::MAX_BYTES ) {
+			return new WP_Error( 'bluebranch_chatbot_audio_too_long', __( 'The recording is too long.', 'bluebranch-chatbot' ), array( 'status' => 413 ) );
+		}
+
+		// The type the browser claims, without parameters such as codecs.
+		$mime = strtolower( trim( explode( ';', (string) $file['type'] )[0] ) );
+
+		if ( ! in_array( $mime, Voice::mime_types(), true ) ) {
+			return new WP_Error( 'bluebranch_chatbot_audio_type', __( 'This audio format is not supported.', 'bluebranch-chatbot' ), array( 'status' => 415 ) );
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local upload, not a remote URL.
+		$audio = file_get_contents( $file['tmp_name'] );
+
+		if ( false === $audio || '' === $audio ) {
+			return new WP_Error( 'bluebranch_chatbot_no_audio', __( 'No recording received.', 'bluebranch-chatbot' ), array( 'status' => 400 ) );
+		}
+
+		$result = ( new Api_Client() )->transcribe( $audio, $mime, substr( $this->request_language( $request ), 0, 2 ) );
+
+		if ( is_wp_error( $result ) ) {
+			$data   = (array) $result->get_error_data();
+			$status = isset( $data['status'] ) ? (int) $data['status'] : 502;
+
+			if ( 413 === $status ) {
+				$max = isset( $data['maxSeconds'] ) ? (int) $data['maxSeconds'] : 0;
+
+				return new WP_Error(
+					'bluebranch_chatbot_audio_too_long',
+					__( 'The recording is too long.', 'bluebranch-chatbot' ),
+					array(
+						'status'     => 413,
+						'maxSeconds' => $max,
+					)
+				);
+			}
+
+			if ( 415 === $status ) {
+				return new WP_Error( 'bluebranch_chatbot_audio_type', __( 'This audio format is not supported.', 'bluebranch-chatbot' ), array( 'status' => 415 ) );
+			}
+
+			if ( 429 === $status ) {
+				return new WP_Error(
+					'bluebranch_chatbot_rate_limit',
+					Api_Client::limit_message( isset( $data['reason'] ) ? (string) $data['reason'] : '' ),
+					array( 'status' => 429 )
+				);
+			}
+
+			if ( 503 === $status ) {
+				return new WP_Error( 'bluebranch_chatbot_voice_unavailable', __( 'Voice input is not available.', 'bluebranch-chatbot' ), array( 'status' => 503 ) );
+			}
+
+			return new WP_Error( 'bluebranch_chatbot_failed', __( 'The recording could not be turned into text.', 'bluebranch-chatbot' ), array( 'status' => 502 ) );
+		}
+
+		return rest_ensure_response( $result );
 	}
 
 	/**

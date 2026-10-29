@@ -32,6 +32,11 @@ class Admin {
 	const PAGE_CONTENT = 'bluebranch-chatbot';
 
 	/**
+	 * Menu slug of the "Getting started" screen.
+	 */
+	const PAGE_START = 'bluebranch-chatbot-start';
+
+	/**
 	 * Menu slug of the training screen.
 	 */
 	const PAGE_TRAINING = 'bluebranch-chatbot-training';
@@ -97,6 +102,7 @@ class Admin {
 	 */
 	public function __construct() {
 		$this->screens = array(
+			'start'    => new Start_Page(),
 			'settings' => new Settings_Page(),
 			'content'  => new Trained_Content_Page(),
 			'training' => new Training_Page(),
@@ -117,6 +123,7 @@ class Admin {
 		add_filter( 'upload_mimes', array( $this, 'allow_markdown' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( BLUEBRANCH_CHATBOT_FILE ), array( $this, 'add_action_link' ) );
 
+		$this->screens['start']->register();
 		$this->screens['settings']->register();
 		$this->screens['extra']->register();
 		$this->screens['log']->register();
@@ -157,6 +164,15 @@ class Admin {
 			__( 'Trained content', 'bluebranch-chatbot' ),
 			self::CAPABILITY,
 			self::PAGE_CONTENT
+		);
+
+		$this->hooks[] = add_submenu_page(
+			self::PAGE_CONTENT,
+			__( 'Getting started', 'bluebranch-chatbot' ),
+			__( 'Getting started', 'bluebranch-chatbot' ),
+			self::CAPABILITY,
+			self::PAGE_START,
+			array( $this->screens['start'], 'render' )
 		);
 
 		$this->hooks[] = add_submenu_page(
@@ -203,6 +219,37 @@ class Admin {
 		);
 
 		$this->hooks[] = $this->settings_hook;
+
+		// Getting started comes first in the list and so is what the menu opens
+		// -- the parent links to its first entry. The overview stays reachable
+		// as the second one.
+		add_action( 'admin_head', array( $this, 'order_submenu' ), 0 );
+		$this->order_submenu();
+	}
+
+	/**
+	 * Moves "Getting started" to the top of the submenu.
+	 *
+	 * @return void
+	 */
+	public function order_submenu() {
+		global $submenu;
+
+		if ( empty( $submenu[ self::PAGE_CONTENT ] ) ) {
+			return;
+		}
+
+		$entries = $submenu[ self::PAGE_CONTENT ];
+
+		foreach ( $entries as $index => $entry ) {
+			if ( isset( $entry[2] ) && self::PAGE_START === $entry[2] ) {
+				unset( $entries[ $index ] );
+				array_unshift( $entries, $submenu[ self::PAGE_CONTENT ][ $index ] );
+				$submenu[ self::PAGE_CONTENT ] = array_values( $entries ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+				return;
+			}
+		}
 	}
 
 	/**

@@ -4,7 +4,8 @@
  *
  * Copy this file to your theme as bluebranch-chatbot/widget.php to change it.
  * Available in $args: id, position, color, color_contrast, icon_url, bot_name,
- * greeting, suggestions, show_summarize, show_disclaimer.
+ * greeting, suggestions, show_summarize, show_disclaimer, voice (false or an
+ * array with maxSeconds and language).
  *
  * @package BlueBranch\Chatbot
  */
@@ -26,6 +27,7 @@ $bluebranch_chatbot_config = array(
 	'greeting'      => $args['greeting'],
 	'suggestions'   => array_values( (array) $args['suggestions'] ),
 	'showSummarize' => (bool) $args['show_summarize'],
+	'voice'         => $args['voice'],
 );
 ?>
 <div class="chatbot-widget"
@@ -83,6 +85,11 @@ $bluebranch_chatbot_config = array(
 			</label>
 			<textarea class="chatbot-widget__input" id="<?php echo esc_attr( $args['id'] ); ?>-input" rows="1"
 				placeholder="<?php esc_attr_e( 'Your message …', 'bluebranch-chatbot' ); ?>" required></textarea>
+			<?php if ( $args['voice'] ) : ?>
+				<button type="button" class="chatbot-widget__voice" hidden
+					aria-label="<?php esc_attr_e( 'Ask by voice', 'bluebranch-chatbot' ); ?>"
+					title="<?php esc_attr_e( 'Ask by voice', 'bluebranch-chatbot' ); ?>"></button>
+			<?php endif; ?>
 			<button type="submit" class="chatbot-widget__send"
 				aria-label="<?php esc_attr_e( 'Send message', 'bluebranch-chatbot' ); ?>">&#10148;</button>
 		</form>

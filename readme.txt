@@ -4,7 +4,7 @@ Tags: ai, chatbot, search, assistant, gdpr
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,8 @@ The API key stays on the server. The browser only ever talks to WordPress, and W
 
 = What you get =
 
+* **Voice input** (optional) -- a microphone button in the chat window and in the question field. Visitors speak, the recording is turned into text and answered like a typed question. Needs HTTPS and a plan with speech recognition.
+* **Getting started screen** -- the first menu entry walks through key, first training, chat button, a test question and the extras, and shows which steps are done.
 * **Chat widget** -- a collapsible chat button, positioned in any corner, with a configurable name, colour, icon, greeting and suggested questions.
 * **Search answer** -- a question field that answers below itself without a page reload, sources included. Placed above a set of search results it answers the term that was searched for instead, using the field your theme already has.
 * **Trained content screen** -- see what the knowledge base actually holds, delete single entries or all of them, and ask a test question without leaving wp-admin.
@@ -75,6 +77,7 @@ This plugin relies on the BlueBranch Chatbot API at `https://api.chatbot.bluebra
 * *When a post is published or updated, and during a training run:* the post title, its URL, its content as Markdown, its meta description, a list of frequent words and the language of the site. The content is taken from the page as crawled, with headers, footers, menus, sidebars and repeated blocks removed. This happens only for posts of the types you selected, and only once you have stored an API key. Nothing is sent again while its content is unchanged.
 * *When a post stops being public, is deleted, or is excluded:* its identifier (`post_<ID>`), so the entry can be withdrawn.
 * *When a visitor asks a question:* the question itself and the language code. When the visitor uses the "summarise this page" button, the visible text of that page is sent with it. Chat mode additionally sends the last few messages of that visitor's own conversation so follow-up questions make sense.
+* *When a visitor uses voice input* (only if you switched it on): the recording of that one question, as audio, together with the language code. It is passed on from memory, turned into text and discarded; neither your server nor the API keeps it, and nothing is sent when the browser records complete silence. The text then goes out as a question, as described above.
 * *When additional content is saved or switched on:* its title, its text (for a file: the text extracted from it on your server -- never the file itself) and the language code, as `extra_<ID>` without an address. Switching it off or deleting it sends the identifier so it can be withdrawn.
 * *Saved questions and feedback* (if switched on) stay in your WordPress database and are not sent anywhere.
 * *On the admin screens:* requests to list, delete and count trained content, and to read the usage tier of your key.
@@ -148,6 +151,12 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.3.0 =
+* New: optional voice input. A microphone button in the chat window and in the question field records the question, shows the level while recording and has the API turn it into text. Switched on under *Settings → Voice input*; the shortcode attribute `voice="no"` hides it in one placement. Needs HTTPS and a plan with speech recognition; a spoken question counts twice towards the quota.
+* New: *Getting started* as the first menu entry -- API key (checked before it is kept), training run, chat button, test question and extras on one screen.
+* New design for the chat window: header with avatar and gradient, suggestion pills, rounded input. The colours follow the accent colour of the settings.
+* New REST route `POST /transcribe`, protected like the other visitor routes (origin, token, rate limit).
+
 = 1.2.2 =
 * Table names in database queries go through `$wpdb->prepare()` with the `%i` identifier placeholder instead of being concatenated into the SQL.
 * Requires WordPress 6.2 or newer (for `%i`).
@@ -190,6 +199,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Voice input (off by default), a Getting started screen and a new chat window design. Clear the page cache so visitors get the updated scripts and styles.
 
 = 1.2.2 =
 Requires WordPress 6.2 or newer.

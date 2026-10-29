@@ -101,6 +101,13 @@ class Settings_Page {
 					'styling'      => __( 'Styling', 'bluebranch-chatbot' ),
 				),
 			),
+			'voice'       => array(
+				'title'  => __( 'Voice input', 'bluebranch-chatbot' ),
+				'intro'  => 'describe_voice',
+				'fields' => array(
+					'voice_input' => __( 'Microphone', 'bluebranch-chatbot' ),
+				),
+			),
 			'widget'      => array(
 				'title'  => __( 'Chat widget', 'bluebranch-chatbot' ),
 				'intro'  => 'describe_widget',
@@ -282,7 +289,7 @@ class Settings_Page {
 		$retention                   = isset( $input['log_retention_days'] ) ? absint( $input['log_retention_days'] ) : $defaults['log_retention_days'];
 		$clean['log_retention_days'] = min( $retention, 3650 );
 
-		foreach ( array( 'hide_summarize', 'hide_disclaimer', 'widget_auto_display', 'unstyled', 'auto_train', 'purge_enabled', 'search_integration', 'debug_logging', 'strip_boilerplate', 'reconcile_sitemap', 'log_enabled', 'feedback_enabled' ) as $flag ) {
+		foreach ( array( 'hide_summarize', 'hide_disclaimer', 'widget_auto_display', 'unstyled', 'auto_train', 'purge_enabled', 'search_integration', 'debug_logging', 'strip_boilerplate', 'reconcile_sitemap', 'log_enabled', 'feedback_enabled', 'voice_enabled' ) as $flag ) {
 			$clean[ $flag ] = ! empty( $input[ $flag ] );
 		}
 
@@ -298,10 +305,15 @@ class Settings_Page {
 	/**
 	 * Splits a textarea into trimmed, non-empty lines.
 	 *
-	 * @param string $value Raw textarea content.
+	 * @param string|string[] $value Raw textarea content, or a list that was stored
+	 *                               before and is being written back unchanged.
 	 * @return string[]
 	 */
 	private function lines_to_array( $value ) {
+		if ( is_array( $value ) ) {
+			$value = implode( "\n", array_map( 'strval', $value ) );
+		}
+
 		$lines = preg_split( '/\r\n|\r|\n/', (string) $value );
 
 		if ( ! is_array( $lines ) ) {
@@ -381,6 +393,31 @@ class Settings_Page {
 		printf(
 			'<p>%s</p>',
 			esc_html__( 'Placed on a page it brings its own question field and answers below it. Above a set of search results it answers the term that was searched for instead, using the field the theme already has.', 'bluebranch-chatbot' )
+		);
+	}
+
+	/**
+	 * Introduces the voice input section.
+	 *
+	 * @return void
+	 */
+	public function describe_voice() {
+		printf(
+			'<p>%s</p>',
+			esc_html__( 'Visitors speak their question instead of typing it. The recording is turned into text by the API and sent like a typed question; it is not stored here or there. A spoken question counts twice towards the quota: once for the speech recognition, once for the answer. It needs a secure connection (HTTPS) and a plan that includes speech recognition.', 'bluebranch-chatbot' )
+		);
+	}
+
+	/**
+	 * The voice input switch.
+	 *
+	 * @return void
+	 */
+	public function field_voice_input() {
+		$this->checkbox_field(
+			'voice_enabled',
+			__( 'Offer voice input', 'bluebranch-chatbot' ),
+			__( 'Shows a microphone button in the chat widget and in the question field. The shortcode attribute voice="no" hides it in one placement. Please mention it in your privacy policy.', 'bluebranch-chatbot' )
 		);
 	}
 

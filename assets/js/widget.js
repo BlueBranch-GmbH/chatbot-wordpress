@@ -56,6 +56,8 @@
 		this.greeting = config.greeting || this.strings.greeting;
 		this.suggestions = Array.isArray( config.suggestions ) ? config.suggestions.filter( Boolean ) : [];
 		this.showSummarize = false !== config.showSummarize;
+		this.voiceConfig = config.voice && config.voice.maxSeconds ? config.voice : null;
+		this.voice = null;
 
 		this.loadHistory();
 		this.loadFontSize();
@@ -121,8 +123,40 @@
 		} );
 
 		this.initExport();
+		this.initVoice();
 
 		this.renderSuggestions();
+	};
+
+	/**
+	 * Puts the microphone to work, where the browser can record.
+	 *
+	 * A spoken question is sent like a typed one: once the text is back it is
+	 * dropped into the field and submitted.
+	 */
+	ChatbotWidget.prototype.initVoice = function () {
+		var self = this;
+		var button = this.form.querySelector( '.chatbot-widget__voice' );
+
+		if ( ! this.voiceConfig || ! button || ! window.BlueBranchChatbotVoice ) {
+			return;
+		}
+
+		this.voice = window.BlueBranchChatbotVoice.attach( {
+			button: button,
+			wrap: this.form,
+			waveBefore: this.input.nextSibling,
+			form: this.form,
+			noteAfter: this.form,
+			recordingClass: 'chatbot-widget__voice--recording',
+			maxSeconds: this.voiceConfig.maxSeconds,
+			language: this.voiceConfig.language,
+			onText: function ( text ) {
+				self.input.value = text;
+				self.autoGrow();
+				self.send();
+			}
+		} );
 	};
 
 	/**
@@ -484,6 +518,10 @@
 	ChatbotWidget.prototype.setBusy = function ( state ) {
 		this.isBusy = state;
 		this.input.disabled = state;
+
+		if ( this.voice ) {
+			this.voice.setBusy( state );
+		}
 
 		// Not disabled: it stays clickable and becomes the way out of a running
 		// answer. Greying it out would remove the button at the one moment it

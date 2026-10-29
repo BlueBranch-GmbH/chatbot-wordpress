@@ -58,6 +58,8 @@
 			this.placeholder.start();
 		}
 
+		this.initVoice();
+
 		if ( this.form ) {
 			this.form.addEventListener( 'submit', function ( event ) {
 				event.preventDefault();
@@ -98,6 +100,47 @@
 		}
 	};
 
+	/**
+	 * Puts a microphone into the field, where the browser can record.
+	 *
+	 * Only in the field this module brings itself: the theme's own search
+	 * field is none of its business.
+	 */
+	ChatbotAnswer.prototype.initVoice = function () {
+		var self = this;
+		var button = this.container.querySelector( '.chatbot-ask-voice' );
+		var wrap = button ? button.parentNode : null;
+		var voice = this.config.voice;
+
+		this.voice = null;
+
+		if ( ! voice || ! voice.maxSeconds || ! button || ! this.form || ! window.BlueBranchChatbotVoice ) {
+			return;
+		}
+
+		this.voice = window.BlueBranchChatbotVoice.attach( {
+			button: button,
+			wrap: wrap,
+			form: this.form,
+			noteAfter: this.form,
+			recordingClass: 'chatbot-ask-voice--recording',
+			maxSeconds: voice.maxSeconds,
+			language: voice.language,
+			onText: function ( text ) {
+				if ( self.placeholder ) {
+					self.placeholder.stop();
+				}
+
+				self.input.value = text;
+				self.submit();
+			}
+		} );
+
+		if ( this.voice ) {
+			wrap.classList.add( 'has-voice' );
+		}
+	};
+
 	ChatbotAnswer.prototype.submit = function () {
 		var question = this.input ? this.input.value.trim() : '';
 
@@ -126,6 +169,10 @@
 	 */
 	ChatbotAnswer.prototype.setBusy = function ( state ) {
 		this.busy = state;
+
+		if ( this.voice ) {
+			this.voice.setBusy( state );
+		}
 
 		if ( this.input ) {
 			this.input.disabled = state;

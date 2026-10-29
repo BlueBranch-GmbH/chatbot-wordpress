@@ -1,5 +1,219 @@
 # Copyright (C) 2026 BlueBranch GmbH
 # This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: BlueBranch Chatbot 1.3.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bluebranch-chatbot\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-29T21:08:19+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: bluebranch-chatbot\n"
+
+#. Plugin Name of the plugin
+#: bluebranch-chatbot.php
+#: admin/class-admin.php:143
+#: admin/class-admin.php:144
+#: admin/class-post-meta-box.php:49
+msgid "BlueBranch Chatbot"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: bluebranch-chatbot.php
+msgid "https://github.com/BlueBranch-GmbH/chatbot-wordpress"
+msgstr ""
+
+#. Description of the plugin
+#: bluebranch-chatbot.php
+msgid "AI chat and AI search that answer from your own content only. Your pages are handed to the BlueBranch Chatbot API, which builds a vector knowledge base; answers are rendered as a collapsible chat widget, an ask field or a summary above your search results. The API key never leaves the server."
+msgstr ""
+
+#. Author of the plugin
+#: bluebranch-chatbot.php
+msgid "BlueBranch GmbH"
+msgstr ""
+
+#. Author URI of the plugin
+#: bluebranch-chatbot.php
+msgid "https://www.bluebranch.de/"
+msgstr ""
+
+#: admin/class-admin.php:163
+#: admin/class-admin.php:164
+msgid "Trained content"
+msgstr ""
+
+#: admin/class-admin.php:171
+#: admin/class-admin.php:172
+msgid "Getting started"
+msgstr ""
+
+#: admin/class-admin.php:180
+#: admin/class-admin.php:181
+#: admin/class-training-page.php:59
+msgid "Train content"
+msgstr ""
+
+#: admin/class-admin.php:189
+#: admin/class-admin.php:190
+msgid "Additional content"
+msgstr ""
+
+#: admin/class-admin.php:200
+#: admin/class-admin.php:201
+#: admin/class-settings-page.php:132
+msgid "Questions & feedback"
+msgstr ""
+
+#: admin/class-admin.php:214
+#: admin/class-admin.php:215
+#: admin/class-admin.php:282
+msgid "Settings"
+msgstr ""
+
+#: admin/class-admin.php:341
+msgid "Remove this entry from the knowledge base?"
+msgstr ""
+
+#: admin/class-admin.php:342
+msgid "Remove everything from the knowledge base? This cannot be undone."
+msgstr ""
+
+#: admin/class-admin.php:343
+msgid "Removing …"
+msgstr ""
+
+#: admin/class-admin.php:344
+#: admin/class-extra-content-page.php:283
+#: admin/class-log-list-table.php:91
+msgid "Delete"
+msgstr ""
+
+#: admin/class-admin.php:345
+#: admin/class-extra-content-page.php:131
+msgid "That did not work."
+msgstr ""
+
+#: admin/class-admin.php:346
+msgid "No trained content found."
+msgstr ""
+
+#: admin/class-admin.php:347
+msgid "entries"
+msgstr ""
+
+#. translators: %d: requests per minute.
+#: admin/class-admin.php:349
+#, php-format
+msgid "%d requests per minute."
+msgstr ""
+
+#. translators: 1: requests used this month, 2: monthly quota.
+#: admin/class-admin.php:351
+#, php-format
+msgid "%1$s of %2$s requests used this month."
+msgstr ""
+
+#. translators: %s: requests used this month.
+#: admin/class-admin.php:353
+#, php-format
+msgid "%s requests this month, no monthly limit."
+msgstr ""
+
+#. translators: 1: number shown, 2: number in total.
+#: admin/class-admin.php:355
+#, php-format
+msgid "%1$d of %2$d entries"
+msgstr ""
+
+#. translators: 1: posts done, 2: posts in total.
+#: admin/class-admin.php:357
+#, php-format
+msgid "%1$d of %2$d posts trained"
+msgstr ""
+
+#: admin/class-admin.php:358
+msgid "Run finished."
+msgstr ""
+
+#: admin/class-admin.php:359
+msgid "There is nothing to train."
+msgstr ""
+
+#: admin/class-admin.php:360
+msgid "Working out what to do …"
+msgstr ""
+
+#: admin/class-admin.php:361
+#: admin/class-extra-content-page.php:227
+msgid "trained"
+msgstr ""
+
+#: admin/class-admin.php:362
+msgid "unchanged"
+msgstr ""
+
+#: admin/class-admin.php:363
+msgid "withdrawn"
+msgstr ""
+
+#: admin/class-admin.php:364
+msgid "skipped"
+msgstr ""
+
+#: admin/class-admin.php:365
+#: admin/class-extra-content-page.php:228
+msgid "failed"
+msgstr ""
+
+#: admin/class-admin.php:366
+msgid "yes"
+msgstr ""
+
+#: admin/class-admin.php:367
+msgid "no"
+msgstr ""
+
+#. translators: 1: percentage dropped, 2: yes or no, 3: number of repeated blocks.
+#: admin/class-admin.php:369
+#, php-format
+msgid "%1$d%% of the page was dropped as furniture. Marked by the site itself: %2$s. Repeated blocks known: %3$d."
+msgstr ""
+
+#: admin/class-admin.php:399
+msgid "BlueBranch Chatbot:"
+msgstr ""
+
+#. translators: %s: human readable time difference, e.g. "5 minutes".
+#: admin/class-admin.php:404
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#. translators: %s: link to the settings screen.
+#: admin/class-admin.php:426
+#, php-format
+msgid "No API key has been stored yet. Nothing is trained and no answers are given until one is set on the <a href=\"%s\">settings screen</a>."
+msgstr ""
+
+#: admin/class-extra-content-page.php:46
+#: admin/class-extra-content-page.php:108
+#: admin/class-log-page.php:78
+#: admin/class-log-page.php:160
+#: admin/class-settings-page.php:178
+#: admin/class-start-page.php:80
+#: admin/class-start-page.php:130
+#: admin/class-start-page.php:215
+#: admin/class-trained-content-page.php:32
+#: admin/class-training-page.php:43
+msgid "You are not allowed to access this page."
+msgstr ""
+
+#: admin/class-extra-content-page.php:122
 msgid "Information that is on no page of the site: opening hours, conditions, background for the chatbot, or documents. Files are converted to text on this site; only that text is sent to the API. Answers based on these entries show no link. Everything entered here can be asked about by any visitor and may be quoted in answers -- do not add confidential or internal information."
 msgstr ""
 
@@ -166,7 +380,7 @@ msgid "Not rated"
 msgstr ""
 
 #: admin/class-log-list-table.php:234
-#: admin/class-settings-page.php:105
+#: admin/class-settings-page.php:112
 msgid "Chat widget"
 msgstr ""
 
@@ -175,7 +389,7 @@ msgid "Ask field"
 msgstr ""
 
 #: admin/class-log-list-table.php:236
-#: admin/class-settings-page.php:116
+#: admin/class-settings-page.php:123
 msgid "Search answer"
 msgstr ""
 
@@ -237,6 +451,7 @@ msgid "API access"
 msgstr ""
 
 #: admin/class-settings-page.php:92
+#: admin/class-start-page.php:285
 msgid "API key"
 msgstr ""
 
@@ -256,303 +471,464 @@ msgstr ""
 msgid "Styling"
 msgstr ""
 
+#: admin/class-settings-page.php:105
+#: admin/class-start-page.php:363
+msgid "Voice input"
+msgstr ""
+
 #: admin/class-settings-page.php:108
+msgid "Microphone"
+msgstr ""
+
+#: admin/class-settings-page.php:115
 msgid "Chatbot name"
 msgstr ""
 
-#: admin/class-settings-page.php:109
+#: admin/class-settings-page.php:116
 msgid "Greeting"
 msgstr ""
 
-#: admin/class-settings-page.php:110
+#: admin/class-settings-page.php:117
 msgid "Icon"
 msgstr ""
 
-#: admin/class-settings-page.php:111
+#: admin/class-settings-page.php:118
 msgid "Position"
 msgstr ""
 
-#: admin/class-settings-page.php:112
+#: admin/class-settings-page.php:119
 msgid "Display"
 msgstr ""
 
-#: admin/class-settings-page.php:119
+#: admin/class-settings-page.php:126
 msgid "Wording"
 msgstr ""
 
-#: admin/class-settings-page.php:120
+#: admin/class-settings-page.php:127
 msgid "Typed questions"
 msgstr ""
 
-#: admin/class-settings-page.php:121
+#: admin/class-settings-page.php:128
 msgid "Search results"
 msgstr ""
 
-#: admin/class-settings-page.php:128
+#: admin/class-settings-page.php:135
 msgid "Saving"
 msgstr ""
 
-#: admin/class-settings-page.php:129
+#: admin/class-settings-page.php:136
 msgid "Keep for"
 msgstr ""
 
-#: admin/class-settings-page.php:133
+#: admin/class-settings-page.php:140
 msgid "Content"
 msgstr ""
 
-#: admin/class-settings-page.php:136
+#: admin/class-settings-page.php:143
 msgid "Post types"
 msgstr ""
 
-#: admin/class-settings-page.php:137
+#: admin/class-settings-page.php:144
 msgid "Where the content comes from"
 msgstr ""
 
-#: admin/class-settings-page.php:138
+#: admin/class-settings-page.php:145
 msgid "Sitemap address"
 msgstr ""
 
-#: admin/class-settings-page.php:139
+#: admin/class-settings-page.php:146
 msgid "Behaviour"
 msgstr ""
 
-#: admin/class-settings-page.php:143
+#: admin/class-settings-page.php:150
 msgid "Maintenance"
 msgstr ""
 
-#: admin/class-settings-page.php:146
+#: admin/class-settings-page.php:153
 msgid "Automatic clean-up"
 msgstr ""
 
-#: admin/class-settings-page.php:147
+#: admin/class-settings-page.php:154
 msgid "Interval"
 msgstr ""
 
-#: admin/class-settings-page.php:148
+#: admin/class-settings-page.php:155
 msgid "Debug logging"
 msgstr ""
 
-#: admin/class-settings-page.php:191
+#: admin/class-settings-page.php:198
 msgid "Save changes"
 msgstr ""
 
 #. translators: %s: link to the sign-up page.
-#: admin/class-settings-page.php:337
+#: admin/class-settings-page.php:349
 #, php-format
 msgid "Register at <a href=\"%s\" target=\"_blank\" rel=\"noopener\">chatbot.bluebranch.de</a>, create a key and store it here. The key never leaves the server: the browser only ever talks to WordPress, and WordPress talks to the API."
 msgstr ""
 
-#: admin/class-settings-page.php:359
+#: admin/class-settings-page.php:371
 msgid "Applies to the chat widget and the search answer alike. Anything below can still be overridden per placement with a shortcode attribute."
 msgstr ""
 
-#: admin/class-settings-page.php:371
+#: admin/class-settings-page.php:383
 msgid "The collapsible chat button and the panel behind it. These settings reach nothing else."
 msgstr ""
 
-#: admin/class-settings-page.php:383
+#: admin/class-settings-page.php:395
 msgid "Placed on a page it brings its own question field and answers below it. Above a set of search results it answers the term that was searched for instead, using the field the theme already has."
 msgstr ""
 
-#: admin/class-settings-page.php:395
+#: admin/class-settings-page.php:407
+msgid "Visitors speak their question instead of typing it. The recording is turned into text by the API and sent like a typed question; it is not stored here or there. A spoken question counts twice towards the quota: once for the speech recognition, once for the answer. It needs a secure connection (HTTPS) and a plan that includes speech recognition."
+msgstr ""
+
+#: admin/class-settings-page.php:419
+msgid "Offer voice input"
+msgstr ""
+
+#: admin/class-settings-page.php:420
+msgid "Shows a microphone button in the chat widget and in the question field. The shortcode attribute voice=\"no\" hides it in one placement. Please mention it in your privacy policy."
+msgstr ""
+
+#: admin/class-settings-page.php:432
 msgid "What visitors asked and how they rated the answers, kept on this site for later evaluation. No IP address, browser or user is stored; e-mail addresses, phone numbers and IBANs typed into a question or comment are masked. Feedback given while saving is off is still kept, together with its question and answer."
 msgstr ""
 
-#: admin/class-settings-page.php:407
+#: admin/class-settings-page.php:444
 msgid "Save questions and answers"
 msgstr ""
 
-#: admin/class-settings-page.php:408
+#: admin/class-settings-page.php:445
 msgid "Ask for feedback (thumbs up / down) under every answer"
 msgstr ""
 
-#: admin/class-settings-page.php:410
+#: admin/class-settings-page.php:447
 msgid "Applies to the chat widget and the search answer. Mention the evaluation in your privacy policy."
 msgstr ""
 
-#: admin/class-settings-page.php:424
+#: admin/class-settings-page.php:461
 msgid "days"
 msgstr ""
 
-#: admin/class-settings-page.php:425
+#: admin/class-settings-page.php:462
 msgid "Older entries are deleted once a day. 0 keeps them indefinitely."
 msgstr ""
 
-#: admin/class-settings-page.php:437
+#: admin/class-settings-page.php:474
 msgid "Which content the chatbot may learn from, and where the answers appear."
 msgstr ""
 
-#: admin/class-settings-page.php:451
+#: admin/class-settings-page.php:488
 msgid "Posts that are no longer published, have been excluded or have been set to noindex do not belong in the AI index. The clean-up run hooks into WordPress cron, so no server cronjob is needed -- it is enough that the site is visited now and then."
 msgstr ""
 
 #. translators: %s: human readable time difference, e.g. "3 hours".
-#: admin/class-settings-page.php:460
+#: admin/class-settings-page.php:497
 #, php-format
 msgid "Next run in %s."
 msgstr ""
 
-#: admin/class-settings-page.php:486
+#: admin/class-settings-page.php:523
 msgid "A key is stored. Leave the dots to keep it, empty the field to delete it, or type a new key to replace it."
 msgstr ""
 
-#: admin/class-settings-page.php:488
+#: admin/class-settings-page.php:525
 msgid "No key stored yet."
 msgstr ""
 
-#: admin/class-settings-page.php:500
+#: admin/class-settings-page.php:537
 msgid "Shown in the chat header. Defaults to \"Chat\"."
 msgstr ""
 
-#: admin/class-settings-page.php:509
+#: admin/class-settings-page.php:546
 msgid "Shown when the chat is opened for the first time."
 msgstr ""
 
-#: admin/class-settings-page.php:522
+#: admin/class-settings-page.php:559
 msgid "Used by the chat button, the ask field and the search answer. Leave empty for the built-in blue."
 msgstr ""
 
-#: admin/class-settings-page.php:542
+#: admin/class-settings-page.php:579
 msgid "Choose icon"
 msgstr ""
 
-#: admin/class-settings-page.php:545
+#: admin/class-settings-page.php:582
 msgid "Remove"
 msgstr ""
 
-#: admin/class-settings-page.php:548
+#: admin/class-settings-page.php:585
 msgid "Replaces the built-in AI icon on the chat button. An SVG or a small square PNG works best."
 msgstr ""
 
-#: admin/class-settings-page.php:562
+#: admin/class-settings-page.php:599
 msgid "One per line. Shown as clickable pills in the chat panel and under the question field; clicking one sends it straight away."
 msgstr ""
 
-#: admin/class-settings-page.php:574
+#: admin/class-settings-page.php:611
 msgid "One per line. Typed into the question field character by character as a placeholder. The animation rests on focus, while typing, in a background tab and with reduced motion switched on -- the pills above show the same questions without any movement."
 msgstr ""
 
-#: admin/class-settings-page.php:586
+#: admin/class-settings-page.php:623
 msgid "Button"
 msgstr ""
 
-#: admin/class-settings-page.php:589
-#: includes/class-frontend.php:316
+#: admin/class-settings-page.php:626
+#: includes/class-frontend.php:330
 msgid "Ask"
 msgstr ""
 
-#: admin/class-settings-page.php:594
+#: admin/class-settings-page.php:631
 msgid "Placeholder"
 msgstr ""
 
-#: admin/class-settings-page.php:597
-#: includes/class-frontend.php:315
+#: admin/class-settings-page.php:634
+#: includes/class-frontend.php:329
 msgid "Ask your question …"
 msgstr ""
 
-#: admin/class-settings-page.php:602
+#: admin/class-settings-page.php:639
 msgid "Button while an answer is running"
 msgstr ""
 
-#: admin/class-settings-page.php:605
-#: includes/class-frontend.php:317
+#: admin/class-settings-page.php:642
+#: includes/class-frontend.php:331
 msgid "Stop"
 msgstr ""
 
-#: admin/class-settings-page.php:610
+#: admin/class-settings-page.php:647
 msgid "Leave empty for the wording shown in grey. Applies to the question field on the site and to the test field in the back end alike."
 msgstr ""
 
-#: admin/class-settings-page.php:620
+#: admin/class-settings-page.php:657
 msgid "Which corner the chat button sits in."
 msgstr ""
 
-#: admin/class-settings-page.php:629
+#: admin/class-settings-page.php:666
 msgid "How often the clean-up runs at most."
 msgstr ""
 
-#: admin/class-settings-page.php:640
+#: admin/class-settings-page.php:677
 msgid "Show the chat button on every page"
 msgstr ""
 
-#: admin/class-settings-page.php:641
+#: admin/class-settings-page.php:678
 msgid "Hide the \"summarise this page\" pill"
 msgstr ""
 
-#: admin/class-settings-page.php:642
+#: admin/class-settings-page.php:679
 msgid "Hide the \"Private chats & hosted in Germany\" note"
 msgstr ""
 
-#: admin/class-settings-page.php:644
+#: admin/class-settings-page.php:681
 msgid "Without the first, the button only appears where the shortcode or the block is placed."
 msgstr ""
 
-#: admin/class-settings-page.php:656
+#: admin/class-settings-page.php:693
 msgid "Do not load the plugin stylesheet"
 msgstr ""
 
-#: admin/class-settings-page.php:657
+#: admin/class-settings-page.php:694
 msgid "Applies to the chat button, the ask field and the search answer alike. Everything keeps working; the appearance then has to come entirely from your own CSS. Every colour and size is a CSS custom property on the containers, so restyling rarely needs this switched off."
 msgstr ""
 
-#: admin/class-settings-page.php:669
+#: admin/class-settings-page.php:706
 msgid "Train a post when it is published or updated"
 msgstr ""
 
-#: admin/class-settings-page.php:670
+#: admin/class-settings-page.php:707
 msgid "Leave out blocks that appear on most pages"
 msgstr ""
 
-#: admin/class-settings-page.php:672
+#: admin/class-settings-page.php:709
 msgid "Training runs shortly after the save through WordPress cron, so saving stays fast. Repeated blocks are sampled at the start of a run -- a cookie notice, a breadcrumb bar, a newsletter box under every article."
 msgstr ""
 
-#: admin/class-settings-page.php:684
+#: admin/class-settings-page.php:721
 msgid "Show a summarising AI answer above the search results"
 msgstr ""
 
-#: admin/class-settings-page.php:685
+#: admin/class-settings-page.php:722
 msgid "Added to the theme's own search results page. For full control over where it sits, place the block or the shortcode instead."
 msgstr ""
 
-#: admin/class-settings-page.php:697
+#: admin/class-settings-page.php:734
 msgid "Remove content that no longer qualifies"
 msgstr ""
 
-#: admin/class-settings-page.php:698
+#: admin/class-settings-page.php:735
 msgid "Withdraw content the sitemap no longer lists"
 msgstr ""
 
-#: admin/class-settings-page.php:700
+#: admin/class-settings-page.php:737
 msgid "The second catches what the rules cannot see: a post an SEO plugin dropped from the sitemap. A sitemap that fails to load, or that would empty a large part of the index, is ignored rather than acted on."
 msgstr ""
 
-#: admin/class-settings-page.php:712
+#: admin/class-settings-page.php:749
 msgid "Write detailed entries to the PHP error log"
 msgstr ""
 
-#: admin/class-settings-page.php:713
+#: admin/class-settings-page.php:750
 msgid "For troubleshooting only. Errors are logged either way; this adds a line for every training and deletion."
 msgstr ""
 
-#: admin/class-settings-page.php:726
+#: admin/class-settings-page.php:763
 msgid "Crawling fetches each page over HTTP and trains what a reader sees, including anything the template renders outside the post content. Rendering runs the post content through the_content instead, which is faster and works on servers that refuse to let a site call itself. A failed crawl falls back to rendering on its own."
 msgstr ""
 
-#: admin/class-settings-page.php:748
+#: admin/class-settings-page.php:785
 msgid "Leave empty to find it automatically: robots.txt is read first, which is where every SEO plugin announces its own sitemap."
 msgstr ""
 
-#: admin/class-settings-page.php:754
+#: admin/class-settings-page.php:791
 msgid "Found:"
 msgstr ""
 
-#: admin/class-settings-page.php:763
+#: admin/class-settings-page.php:800
 msgid "No sitemap could be found. Crawling needs one; enter its address here or switch to rendered content."
 msgstr ""
 
-#: admin/class-settings-page.php:794
+#: admin/class-settings-page.php:831
 msgid "Only published, publicly visible entries without a password are ever trained."
+msgstr ""
+
+#: admin/class-start-page.php:46
+msgid "The chat button is now shown on every page."
+msgstr ""
+
+#: admin/class-start-page.php:47
+msgid "Voice input is switched on."
+msgstr ""
+
+#: admin/class-start-page.php:48
+msgid "Ratings under the answers are switched on."
+msgstr ""
+
+#: admin/class-start-page.php:155
+msgid "The key was accepted and stored."
+msgstr ""
+
+#: admin/class-start-page.php:156
+msgid "The API did not accept this key, so it was not stored. Please check it and try again."
+msgstr ""
+
+#: admin/class-start-page.php:157
+msgid "Please enter a key."
+msgstr ""
+
+#: admin/class-start-page.php:170
+msgid "The setting was switched off."
+msgstr ""
+
+#. translators: 1: steps done, 2: steps in total.
+#: admin/class-start-page.php:254
+#, php-format
+msgid "%1$d of %2$d steps done"
+msgstr ""
+
+#: admin/class-start-page.php:258
+msgid "Getting started with the BlueBranch Chatbot"
+msgstr ""
+
+#: admin/class-start-page.php:263
+msgid "Everything is set up. Ask a test question below, or switch on voice input."
+msgstr ""
+
+#: admin/class-start-page.php:264
+msgid "Three short steps and your visitors can ask questions about your site."
+msgstr ""
+
+#: admin/class-start-page.php:276
+msgid "Enter your API key"
+msgstr ""
+
+#: admin/class-start-page.php:278
+msgid "A key is stored. Enter a new one here to replace it; it is checked before it is kept."
+msgstr ""
+
+#: admin/class-start-page.php:280
+msgid "You receive the key with your account. It is checked right away and is never shown again."
+msgstr ""
+
+#: admin/class-start-page.php:287
+msgid "New key (optional)"
+msgstr ""
+
+#: admin/class-start-page.php:287
+msgid "Paste your key"
+msgstr ""
+
+#: admin/class-start-page.php:288
+msgid "Check and save"
+msgstr ""
+
+#: admin/class-start-page.php:296
+msgid "Let the chatbot learn your site"
+msgstr ""
+
+#: admin/class-start-page.php:298
+msgid "Possible once a key is stored."
+msgstr ""
+
+#. translators: 1: posts trained, 2: posts that could be trained.
+#: admin/class-start-page.php:305
+#, php-format
+msgid "%1$d of %2$d posts are known to the chatbot. Only what has changed is sent again."
+msgstr ""
+
+#: admin/class-start-page.php:314
+msgid "Update now"
+msgstr ""
+
+#: admin/class-start-page.php:314
+msgid "Train now"
+msgstr ""
+
+#: admin/class-start-page.php:316
+msgid "Leave this tab open until the run finishes."
+msgstr ""
+
+#: admin/class-start-page.php:330
+msgid "Show the chat button"
+msgstr ""
+
+#: admin/class-start-page.php:334
+msgid "Chat button on every page"
+msgstr ""
+
+#: admin/class-start-page.php:335
+msgid "A round button in the corner opens the chat. Alternatively place it yourself with the shortcode [bluebranch_chatbot_widget] or the block."
+msgstr ""
+
+#: admin/class-start-page.php:344
+msgid "Ask a test question"
+msgstr ""
+
+#: admin/class-start-page.php:345
+msgid "The very field your visitors get. Ask something your site can answer."
+msgstr ""
+
+#: admin/class-start-page.php:359
+msgid "Extras"
+msgstr ""
+
+#: admin/class-start-page.php:365
+msgid "Visitors speak their question. Your plan does not include speech recognition yet."
+msgstr ""
+
+#: admin/class-start-page.php:366
+msgid "Visitors speak their question into a microphone button. Needs HTTPS. Please mention it in your privacy policy."
+msgstr ""
+
+#: admin/class-start-page.php:371
+msgid "Ratings under the answers"
+msgstr ""
+
+#: admin/class-start-page.php:372
+msgid "Thumbs up and down show you which answers helped. They appear under Questions & feedback."
+msgstr ""
+
+#: admin/class-start-page.php:377
+msgid "All settings"
 msgstr ""
 
 #: admin/class-trained-content-page.php:49
@@ -673,46 +1049,59 @@ msgstr ""
 msgid "The feedback could not be saved."
 msgstr ""
 
-#: includes/class-api-client.php:194
-#: includes/class-rest-controller.php:599
+#: includes/class-api-client.php:148
+#: includes/class-api-client.php:307
+#: includes/class-rest-controller.php:701
 msgid "No API key has been stored yet."
 msgstr ""
 
+#: includes/class-api-client.php:185
+msgid "The speech recognition of the Chatbot API could not be reached."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: includes/class-api-client.php:199
+#, php-format
+msgid "The speech recognition of the Chatbot API answered with HTTP %d."
+msgstr ""
+
 #. translators: 1: HTTP method, 2: endpoint, 3: error message.
-#: includes/class-api-client.php:225
+#: includes/class-api-client.php:338
 #, php-format
 msgid "The Chatbot API could not be reached (%1$s %2$s): %3$s"
 msgstr ""
 
 #. translators: 1: HTTP method, 2: endpoint, 3: status code, 4: error message.
-#: includes/class-api-client.php:248
+#: includes/class-api-client.php:361
 #, php-format
 msgid "The Chatbot API rejected a request (%1$s %2$s, HTTP %3$d): %4$s"
 msgstr ""
 
-#: includes/class-api-client.php:276
-#: includes/class-rest-controller.php:752
+#: includes/class-api-client.php:396
+#: includes/class-rest-controller.php:904
 msgid "The chatbot is not configured yet."
 msgstr ""
 
-#: includes/class-api-client.php:333
-#: includes/class-api-client.php:563
-#: includes/class-api-client.php:582
-#: includes/class-rest-controller.php:800
+#: includes/class-api-client.php:453
+#: includes/class-api-client.php:730
+#: includes/class-api-client.php:750
+#: includes/class-rest-controller.php:1046
 msgid "The request could not be answered."
 msgstr ""
 
-#. translators: 1: status code, 2: message from the API.
-#: includes/class-api-client.php:555
-#, php-format
-msgid "The Chatbot API answered a stream request with HTTP %1$d: %2$s"
+#: includes/class-api-client.php:695
+msgid "The chat is not available at the moment. Please try again later."
 msgstr ""
 
-#: includes/class-api-client.php:562
-#: includes/class-api-client.php:581
-#: includes/class-rest-controller.php:744
-#: includes/class-rest-controller.php:799
+#: includes/class-api-client.php:698
+#: includes/class-rest-controller.php:896
 msgid "There are too many open requests right now. Please try again in a minute."
+msgstr ""
+
+#. translators: 1: status code, 2: message from the API.
+#: includes/class-api-client.php:722
+#, php-format
+msgid "The Chatbot API answered a stream request with HTTP %1$d: %2$s"
 msgstr ""
 
 #: includes/class-crawler.php:56
@@ -743,13 +1132,13 @@ msgstr ""
 msgid "%s came back empty."
 msgstr ""
 
-#: includes/class-cron.php:81
-#: includes/class-options.php:86
+#: includes/class-cron.php:82
+#: includes/class-options.php:87
 msgid "Every 6 hours"
 msgstr ""
 
 #. translators: 1: number of entries, 2: percentage.
-#: includes/class-cron.php:315
+#: includes/class-cron.php:318
 #, php-format
 msgid "Sitemap reconciliation stopped: it would have withdrawn %1$d entries (%2$d%% of the index). The sitemap is probably incomplete rather than the index wrong."
 msgstr ""
@@ -766,273 +1155,352 @@ msgstr ""
 msgid "The entry could not be saved."
 msgstr ""
 
-#: includes/class-extra-content.php:326
+#: includes/class-extra-content.php:344
+msgid "The file was deleted from the media library."
+msgstr ""
+
+#: includes/class-extra-content.php:377
 msgid "Please choose a file."
 msgstr ""
 
-#: includes/class-extra-content.php:332
+#: includes/class-extra-content.php:383
 msgid "This file type is not supported. Allowed: TXT, MD, CSV, HTML, PDF, DOCX, ODT."
 msgstr ""
 
-#: includes/class-frontend.php:128
-#: includes/class-frontend.php:239
+#: includes/class-frontend.php:129
+#: includes/class-frontend.php:251
 msgid "How can I help you today?"
 msgstr ""
 
-#: includes/class-frontend.php:129
+#: includes/class-frontend.php:130
 msgid "Summarise this page"
 msgstr ""
 
-#: includes/class-frontend.php:130
+#: includes/class-frontend.php:131
 msgid "Summarise the following page content briefly and precisely. Do not use any other sources or pages:"
 msgstr ""
 
-#: includes/class-frontend.php:131
+#: includes/class-frontend.php:132
 msgid "Please summarise the content of this page briefly."
 msgstr ""
 
-#: includes/class-frontend.php:132
+#: includes/class-frontend.php:133
 msgid "Sorry, no answer could be generated."
 msgstr ""
 
-#: includes/class-frontend.php:133
+#: includes/class-frontend.php:134
 msgid "Something went wrong with the request."
 msgstr ""
 
-#: includes/class-frontend.php:134
+#: includes/class-frontend.php:135
 msgid "Source"
 msgstr ""
 
-#: includes/class-frontend.php:135
-#: templates/search.php:62
+#: includes/class-frontend.php:136
+#: templates/search.php:69
 msgid "Sources:"
 msgstr ""
 
-#: includes/class-frontend.php:136
+#: includes/class-frontend.php:137
 msgid "opens in a new tab"
 msgstr ""
 
-#: includes/class-frontend.php:137
+#: includes/class-frontend.php:138
 msgid "Stop the answer"
 msgstr ""
 
-#: includes/class-frontend.php:138
+#: includes/class-frontend.php:139
 msgid "Answer stopped."
 msgstr ""
 
-#: includes/class-frontend.php:139
+#: includes/class-frontend.php:140
 msgid "Generating the answer …"
 msgstr ""
 
-#: includes/class-frontend.php:140
+#: includes/class-frontend.php:141
 msgid "Answer generated"
 msgstr ""
 
 #. translators: %s: elapsed time, for example "2:30 seconds".
-#: includes/class-frontend.php:142
+#: includes/class-frontend.php:143
 #, php-format
 msgid "%s seconds"
 msgstr ""
 
-#: includes/class-frontend.php:143
+#: includes/class-frontend.php:144
 msgid "Was this answer helpful?"
 msgstr ""
 
-#: includes/class-frontend.php:144
+#: includes/class-frontend.php:145
 msgid "Yes, helpful"
 msgstr ""
 
-#: includes/class-frontend.php:145
+#: includes/class-frontend.php:146
 msgid "No, not helpful"
 msgstr ""
 
-#: includes/class-frontend.php:146
+#: includes/class-frontend.php:147
 msgid "What was wrong with it? (optional)"
 msgstr ""
 
-#: includes/class-frontend.php:147
+#: includes/class-frontend.php:148
 msgid "Please do not enter any personal data."
 msgstr ""
 
-#: includes/class-frontend.php:148
+#: includes/class-frontend.php:149
 msgid "Send"
 msgstr ""
 
-#: includes/class-frontend.php:149
+#: includes/class-frontend.php:150
 msgid "Thank you for your feedback!"
 msgstr ""
 
-#: includes/class-frontend.php:150
+#: includes/class-frontend.php:151
 msgid "The feedback could not be sent."
 msgstr ""
 
-#: includes/class-frontend.php:151
+#: includes/class-frontend.php:152
 msgid "Answer interrupted."
 msgstr ""
 
-#: includes/class-frontend.php:152
-#: templates/widget.php:62
-#: templates/widget.php:63
+#: includes/class-frontend.php:153
+#: templates/widget.php:64
+#: templates/widget.php:65
 msgid "Export the chat"
 msgstr ""
 
-#: includes/class-frontend.php:153
-#: templates/widget.php:65
+#: includes/class-frontend.php:154
+#: templates/widget.php:67
 msgid "As text (.txt)"
 msgstr ""
 
-#: includes/class-frontend.php:154
-#: templates/widget.php:66
+#: includes/class-frontend.php:155
+#: templates/widget.php:68
 msgid "As WebVTT (.vtt)"
 msgstr ""
 
-#: includes/class-frontend.php:155
+#: includes/class-frontend.php:156
 msgid "You"
 msgstr ""
 
-#: includes/class-frontend.php:238
+#: includes/class-frontend.php:157
+#: templates/search.php:45
+#: templates/search.php:46
+#: templates/widget.php:90
+#: templates/widget.php:91
+msgid "Ask by voice"
+msgstr ""
+
+#: includes/class-frontend.php:158
+msgid "Finish the recording and send"
+msgstr ""
+
+#: includes/class-frontend.php:159
+msgid "Cancel the recording"
+msgstr ""
+
+#: includes/class-frontend.php:160
+msgid "Turning your question into text …"
+msgstr ""
+
+#: includes/class-frontend.php:161
+msgid "Nothing was understood. Please try again."
+msgstr ""
+
+#: includes/class-frontend.php:162
+msgid "The browser does not allow access to the microphone."
+msgstr ""
+
+#: includes/class-frontend.php:163
+#: includes/class-rest-controller.php:994
+msgid "The recording could not be turned into text."
+msgstr ""
+
+#. translators: %d: longest recording in seconds.
+#: includes/class-frontend.php:165
+#, php-format
+msgid "The recording was too long (at most %d seconds)."
+msgstr ""
+
+#: includes/class-frontend.php:166
+msgid "Too many requests. Please try again in a moment."
+msgstr ""
+
+#: includes/class-frontend.php:250
 msgid "Chat"
 msgstr ""
 
-#: includes/class-frontend.php:505
+#: includes/class-frontend.php:520
 msgid "BlueBranch Chatbot: no API key has been stored yet. Only administrators see this note."
 msgstr ""
 
-#: includes/class-options.php:85
+#: includes/class-options.php:86
 msgid "Hourly"
 msgstr ""
 
-#: includes/class-options.php:87
+#: includes/class-options.php:88
 msgid "Daily"
 msgstr ""
 
-#: includes/class-options.php:88
+#: includes/class-options.php:89
 msgid "Weekly"
 msgstr ""
 
-#: includes/class-options.php:99
+#: includes/class-options.php:100
 msgid "Crawl the page (recommended)"
 msgstr ""
 
-#: includes/class-options.php:100
+#: includes/class-options.php:101
 msgid "Render the post content"
 msgstr ""
 
-#: includes/class-options.php:120
+#: includes/class-options.php:121
 msgid "Bottom right"
 msgstr ""
 
-#: includes/class-options.php:121
+#: includes/class-options.php:122
 msgid "Bottom left"
 msgstr ""
 
-#: includes/class-options.php:122
+#: includes/class-options.php:123
 msgid "Top right"
 msgstr ""
 
-#: includes/class-options.php:123
+#: includes/class-options.php:124
 msgid "Top left"
 msgstr ""
 
-#: includes/class-rest-controller.php:339
-#: includes/class-rest-controller.php:450
+#: includes/class-rest-controller.php:362
+#: includes/class-rest-controller.php:534
+#: includes/class-rest-controller.php:927
 msgid "Too many requests."
 msgstr ""
 
-#: includes/class-rest-controller.php:440
-#: includes/class-rest-controller.php:729
-msgid "Your session has expired. Please reload the page and try again."
+#: includes/class-rest-controller.php:435
+msgid "This request is not allowed from another website."
 msgstr ""
 
-#: includes/class-rest-controller.php:446
+#: includes/class-rest-controller.php:530
 msgid "Feedback is switched off."
 msgstr ""
 
-#: includes/class-rest-controller.php:615
+#: includes/class-rest-controller.php:717
 msgid "The training run has expired. Please start it again."
 msgstr ""
 
 #. translators: %s: the underlying error message.
-#: includes/class-rest-controller.php:669
+#: includes/class-rest-controller.php:771
 #, php-format
 msgid "This site cannot fetch its own pages, so crawling is not possible here: %s"
+msgstr ""
+
+#: includes/class-rest-controller.php:847
+msgid "Your session has expired. Please reload the page and try again."
+msgstr ""
+
+#: includes/class-rest-controller.php:923
+msgid "Voice input is switched off."
+msgstr ""
+
+#: includes/class-rest-controller.php:931
+#: includes/class-rest-controller.php:991
+msgid "Voice input is not available."
+msgstr ""
+
+#: includes/class-rest-controller.php:938
+#: includes/class-rest-controller.php:956
+msgid "No recording received."
+msgstr ""
+
+#: includes/class-rest-controller.php:942
+#: includes/class-rest-controller.php:970
+msgid "The recording is too long."
+msgstr ""
+
+#: includes/class-rest-controller.php:949
+#: includes/class-rest-controller.php:979
+msgid "This audio format is not supported."
 msgstr ""
 
 #: includes/class-sitemap.php:50
 msgid "No XML sitemap was found. Enter its address in the settings, or switch training to rendered content."
 msgstr ""
 
-#: includes/class-text-extractor.php:62
+#: includes/class-text-extractor.php:68
 msgid "The file could not be found."
 msgstr ""
 
-#: includes/class-text-extractor.php:78
+#: includes/class-text-extractor.php:84
 msgid "This file type is not supported."
 msgstr ""
 
-#: includes/class-text-extractor.php:82
+#: includes/class-text-extractor.php:88
 msgid "The file is larger than 20 MB."
 msgstr ""
 
-#: includes/class-text-extractor.php:110
+#: includes/class-text-extractor.php:116
 msgid "No text could be read from the file. Scanned documents need to be run through text recognition first."
 msgstr ""
 
-#: includes/class-text-extractor.php:189
+#: includes/class-text-extractor.php:195
 msgid "PDF files cannot be read on this installation (the PDF library is missing)."
 msgstr ""
 
 #. translators: %s: error message from the PDF library.
-#: includes/class-text-extractor.php:201
+#: includes/class-text-extractor.php:215
 #, php-format
 msgid "The PDF could not be read: %s"
 msgstr ""
 
-#: includes/class-text-extractor.php:220
+#: includes/class-text-extractor.php:234
 msgid "Office documents cannot be read on this server (the zip extension is missing)."
 msgstr ""
 
-#: includes/class-text-extractor.php:226
-#: includes/class-text-extractor.php:233
+#: includes/class-text-extractor.php:240
+#: includes/class-text-extractor.php:257
 msgid "The document could not be opened."
 msgstr ""
 
-#: templates/search.php:35
+#: includes/class-text-extractor.php:250
+msgid "The document is too large once unpacked."
+msgstr ""
+
+#: templates/search.php:37
 msgid "Your question"
 msgstr ""
 
-#: templates/widget.php:53
-#: templates/widget.php:54
+#: templates/widget.php:55
+#: templates/widget.php:56
 msgid "Increase font size"
 msgstr ""
 
-#: templates/widget.php:56
-#: templates/widget.php:57
+#: templates/widget.php:58
+#: templates/widget.php:59
 msgid "Decrease font size"
 msgstr ""
 
-#: templates/widget.php:70
-#: templates/widget.php:71
+#: templates/widget.php:72
+#: templates/widget.php:73
 msgid "Clear the chat"
 msgstr ""
 
-#: templates/widget.php:73
+#: templates/widget.php:75
 msgid "Close the chat"
 msgstr ""
 
-#: templates/widget.php:82
+#: templates/widget.php:84
 msgid "Your message"
 msgstr ""
 
-#: templates/widget.php:85
+#: templates/widget.php:87
 msgid "Your message …"
 msgstr ""
 
-#: templates/widget.php:87
+#: templates/widget.php:94
 msgid "Send message"
 msgstr ""
 
-#: templates/widget.php:92
+#: templates/widget.php:99
 msgid "Private chats &amp; hosted in Germany"
 msgstr ""
 
@@ -1070,35 +1538,4 @@ msgstr ""
 #: blocks/widget/block.json
 msgctxt "block description"
 msgid "A collapsible chat button that answers from your own content."
-msgstr ""
-
-#: includes/class-extra-content.php
-msgid "The file was deleted from the media library."
-msgstr ""
-
-#: includes/class-rest-controller.php
-msgid "This request is not allowed from another website."
-msgstr ""
-
-#: includes/class-text-extractor.php
-msgid "The document is too large once unpacked."
-msgstr ""
-
-#. translators: %d: requests per minute.
-#: admin/class-admin.php
-msgid "%d requests per minute."
-msgstr ""
-
-#. translators: 1: requests used this month, 2: monthly quota.
-#: admin/class-admin.php
-msgid "%1$s of %2$s requests used this month."
-msgstr ""
-
-#. translators: %s: requests used this month.
-#: admin/class-admin.php
-msgid "%s requests this month, no monthly limit."
-msgstr ""
-
-#: includes/class-api-client.php
-msgid "The chat is not available at the moment. Please try again later."
 msgstr ""

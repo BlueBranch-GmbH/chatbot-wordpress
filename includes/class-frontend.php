@@ -86,11 +86,12 @@ class Frontend {
 		wp_register_script( 'bluebranch-chatbot-markdown', $url . 'js/markdown.js', array(), VERSION, true );
 		wp_register_script( 'bluebranch-chatbot-typed-placeholder', $url . 'js/typed-placeholder.js', array(), VERSION, true );
 		wp_register_script( 'bluebranch-chatbot-client', $url . 'js/client.js', array(), VERSION, true );
+		wp_register_script( 'bluebranch-chatbot-voice', $url . 'js/voice.js', array( 'bluebranch-chatbot-client' ), VERSION, true );
 
 		wp_register_script(
 			'bluebranch-chatbot-widget',
 			$url . 'js/widget.js',
-			array( 'bluebranch-chatbot-markdown', 'bluebranch-chatbot-client' ),
+			array( 'bluebranch-chatbot-markdown', 'bluebranch-chatbot-client', 'bluebranch-chatbot-voice' ),
 			VERSION,
 			true
 		);
@@ -98,7 +99,7 @@ class Frontend {
 		wp_register_script(
 			'bluebranch-chatbot-answer',
 			$url . 'js/answer.js',
-			array( 'bluebranch-chatbot-markdown', 'bluebranch-chatbot-client', 'bluebranch-chatbot-typed-placeholder' ),
+			array( 'bluebranch-chatbot-markdown', 'bluebranch-chatbot-client', 'bluebranch-chatbot-typed-placeholder', 'bluebranch-chatbot-voice' ),
 			VERSION,
 			true
 		);
@@ -153,6 +154,16 @@ class Frontend {
 			'exportTxt'               => __( 'As text (.txt)', 'bluebranch-chatbot' ),
 			'exportVtt'               => __( 'As WebVTT (.vtt)', 'bluebranch-chatbot' ),
 			'you'                     => __( 'You', 'bluebranch-chatbot' ),
+			'voice'                   => __( 'Ask by voice', 'bluebranch-chatbot' ),
+			'voiceStop'               => __( 'Finish the recording and send', 'bluebranch-chatbot' ),
+			'voiceCancel'             => __( 'Cancel the recording', 'bluebranch-chatbot' ),
+			'voiceWorking'            => __( 'Turning your question into text …', 'bluebranch-chatbot' ),
+			'voiceEmpty'              => __( 'Nothing was understood. Please try again.', 'bluebranch-chatbot' ),
+			'voiceDenied'             => __( 'The browser does not allow access to the microphone.', 'bluebranch-chatbot' ),
+			'voiceError'              => __( 'The recording could not be turned into text.', 'bluebranch-chatbot' ),
+			/* translators: %d: longest recording in seconds. */
+			'voiceTooLong'            => __( 'The recording was too long (at most %d seconds).', 'bluebranch-chatbot' ),
+			'voiceLimit'              => __( 'Too many requests. Please try again in a moment.', 'bluebranch-chatbot' ),
 		);
 	}
 
@@ -200,6 +211,7 @@ class Frontend {
 				'hide_summarize'  => '',
 				'hide_disclaimer' => '',
 				'unstyled'        => '',
+				'voice'           => '',
 			),
 			$atts,
 			'bluebranch_chatbot_widget'
@@ -240,6 +252,7 @@ class Frontend {
 				'suggestions'     => $suggestions,
 				'show_summarize'  => ! ( '' !== $atts['hide_summarize'] ? $this->to_bool( $atts['hide_summarize'] ) : (bool) $settings['hide_summarize'] ),
 				'show_disclaimer' => ! ( '' !== $atts['hide_disclaimer'] ? $this->to_bool( $atts['hide_disclaimer'] ) : (bool) $settings['hide_disclaimer'] ),
+				'voice'           => Voice::config( $atts['voice'] ),
 			)
 		);
 	}
@@ -272,6 +285,7 @@ class Frontend {
 				'stop'        => '',
 				'form'        => 'yes',
 				'autostart'   => 'yes',
+				'voice'       => '',
 			),
 			$atts,
 			'bluebranch_chatbot_search'
@@ -316,6 +330,7 @@ class Frontend {
 				'button'      => $this->wording( $atts['button'], 'ask_button_label', __( 'Ask', 'bluebranch-chatbot' ) ),
 				'stop'        => $this->wording( $atts['stop'], 'ask_stop_label', __( 'Stop', 'bluebranch-chatbot' ) ),
 				'style'       => $accent[2],
+				'voice'       => $this->to_bool( $atts['form'] ) ? Voice::config( $atts['voice'] ) : false,
 			)
 		);
 	}
