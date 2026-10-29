@@ -4,7 +4,7 @@ Tags: ai, chatbot, search, assistant, gdpr
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -151,6 +151,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 
 == Changelog ==
 
+= 1.3.1 =
+* The filter and export queries of *Questions & feedback* use one fixed SQL string with placeholders instead of a clause put together from variables (Plugin Check: `UnescapedDBParameter`). No change in behaviour.
+
 = 1.3.0 =
 * New: optional voice input. A microphone button in the chat window and in the question field records the question, shows the level while recording and has the API turn it into text. Switched on under *Settings → Voice input*; the shortcode attribute `voice="no"` hides it in one placement. Needs HTTPS and a plan with speech recognition; a spoken question counts twice towards the quota.
 * New: *Getting started* as the first menu entry -- API key (checked before it is kept), training run, chat button, test question and extras on one screen.
@@ -199,6 +202,9 @@ No. Deleting the plugin removes its settings and post meta from WordPress, but t
 * Respects password protection and the noindex flags of Yoast SEO, Rank Math and SEOPress.
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+Cleaner database queries on the *Questions & feedback* screen. No change in behaviour.
 
 = 1.3.0 =
 Voice input (off by default), a Getting started screen and a new chat window design. Clear the page cache so visitors get the updated scripts and styles.

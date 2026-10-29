@@ -731,6 +731,10 @@ GPL-2.0-or-later – siehe [LICENSE.txt](LICENSE.txt).
 
 ## Changes
 
+### 1.3.1 - 2026-10-29
+
+- Die Filter- und Export-Abfragen von „Fragen & Feedback“ nutzen einen festen SQL-Text mit Platzhaltern statt einer aus Variablen zusammengesetzten Bedingung (Plugin Check: `UnescapedDBParameter`); Verhalten unverändert. `Answer_Log::where()` heißt jetzt `Answer_Log::where_args()` und liefert nur die Werte
+
 ### 1.3.0 - 2026-10-29
 
 - Spracheingabe (optional, standardmäßig aus): Mikrofon-Knopf im Chat-Fenster und im Fragefeld, Pegel-Wellen und Dauer während der Aufnahme, Abbrechen mit ✕ oder Escape, Stille wird nicht gesendet; neue Route `POST /transcribe` (Herkunft, Token, Ratenlimit), Shortcode-Attribut `voice="no"`

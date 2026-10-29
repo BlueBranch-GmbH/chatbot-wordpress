@@ -162,7 +162,7 @@ class Log_Page {
 
 		check_admin_referer( self::EXPORT_ACTION );
 
-		$where = Answer_Log::where(
+		$args  = Answer_Log::where_args(
 			array(
 				'rating' => Log_List_Table::current_rating(),
 				'search' => Log_List_Table::current_search(),
@@ -190,8 +190,8 @@ class Log_Page {
 		$offset = 0;
 
 		do {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Own table; $where is prepared in Answer_Log::where().
-			$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i {$where} ORDER BY id ASC LIMIT 500 OFFSET %d", $table, $offset ), ARRAY_A );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table.
+			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE (%s = \'all\' OR rating = %s) AND (%s = \'\' OR question LIKE %s OR answer LIKE %s OR comment LIKE %s) ORDER BY id ASC LIMIT 500 OFFSET %d', $table, $args[0], $args[1], $args[2], $args[3], $args[4], $args[5], $offset ), ARRAY_A );
 
 			foreach ( $rows as $row ) {
 				$sources = json_decode( (string) $row['sources'], true );

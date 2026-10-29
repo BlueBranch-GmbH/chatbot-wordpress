@@ -206,32 +206,31 @@ class Answer_Log {
 	}
 
 	/**
-	 * Builds the WHERE clause shared by the list and the export.
+	 * Values for the WHERE clause of the list and the export, in the order of its placeholders:
+	 * `(%s = 'all' OR rating = %s) AND (%s = '' OR question LIKE %s OR answer LIKE %s OR comment LIKE %s)`.
+	 * The clause itself stays a fixed string in the queries, so no SQL is put together from variables.
 	 *
 	 * @param array $filters search and rating.
-	 * @return string Prepared SQL fragment, starting with WHERE.
+	 * @return array Six values.
 	 */
-	public static function where( array $filters ) {
+	public static function where_args( array $filters ) {
 		global $wpdb;
 
-		$where = array( '1=1' );
-
 		$rating = isset( $filters['rating'] ) ? (string) $filters['rating'] : '';
+		$mode   = 'all';
+		$value  = '';
 
 		if ( in_array( $rating, array( 'up', 'down' ), true ) ) {
-			$where[] = $wpdb->prepare( 'rating = %s', $rating );
+			$mode  = 'filter';
+			$value = $rating;
 		} elseif ( 'none' === $rating ) {
-			$where[] = "rating = ''";
+			$mode = 'filter';
 		}
 
 		$search = isset( $filters['search'] ) ? trim( (string) $filters['search'] ) : '';
+		$like   = '%' . $wpdb->esc_like( $search ) . '%';
 
-		if ( '' !== $search ) {
-			$like    = '%' . $wpdb->esc_like( $search ) . '%';
-			$where[] = $wpdb->prepare( '(question LIKE %s OR answer LIKE %s OR comment LIKE %s)', $like, $like, $like );
-		}
-
-		return 'WHERE ' . implode( ' AND ', $where );
+		return array( $mode, $value, $search, $like, $like, $like );
 	}
 
 	/**

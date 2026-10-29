@@ -129,7 +129,7 @@ class Log_List_Table extends \WP_List_Table {
 
 		$this->_column_headers = array( $this->get_columns(), array(), array() );
 
-		$where  = Answer_Log::where(
+		$args   = Answer_Log::where_args(
 			array(
 				'rating' => self::current_rating(),
 				'search' => self::current_search(),
@@ -138,10 +138,10 @@ class Log_List_Table extends \WP_List_Table {
 		$table  = Schema::log_table();
 		$offset = ( $this->get_pagenum() - 1 ) * self::PER_PAGE;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Own table; $where is prepared in Answer_Log::where().
-		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i {$where}", $table ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Own table.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE (%s = \'all\' OR rating = %s) AND (%s = \'\' OR question LIKE %s OR answer LIKE %s OR comment LIKE %s)', $table, $args[0], $args[1], $args[2], $args[3], $args[4], $args[5] ) );
 		$this->items = (array) $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM %i {$where} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d", $table, self::PER_PAGE, $offset ),
+			$wpdb->prepare( 'SELECT * FROM %i WHERE (%s = \'all\' OR rating = %s) AND (%s = \'\' OR question LIKE %s OR answer LIKE %s OR comment LIKE %s) ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d', $table, $args[0], $args[1], $args[2], $args[3], $args[4], $args[5], self::PER_PAGE, $offset ),
 			ARRAY_A
 		);
 		// phpcs:enable
