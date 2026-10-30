@@ -19,6 +19,9 @@
 		this.panel = container.querySelector( '.chatbot-widget__panel' );
 		this.messagesEl = container.querySelector( '.chatbot-widget__messages' );
 		this.suggestionsEl = container.querySelector( '.chatbot-widget__suggestions' );
+		if ( this.suggestionsEl ) {
+			this.enableDragScroll( this.suggestionsEl );
+		}
 		this.form = container.querySelector( '.chatbot-widget__form' );
 		this.input = container.querySelector( '.chatbot-widget__input' );
 		this.sendButton = container.querySelector( '.chatbot-widget__send' );
@@ -504,9 +507,63 @@
 		}
 	};
 
+	/**
+	 * Vorschlags-Pillen ohne Scrollbar: Mit der Maus lassen sie sich ziehen (Touch scrollt von selbst).
+	 */
+	ChatbotWidget.prototype.enableDragScroll = function ( el ) {
+		var startX = 0;
+		var startLeft = 0;
+		var down = false;
+		var moved = false;
+
+		el.addEventListener( 'pointerdown', function ( event ) {
+			if ( 'mouse' !== event.pointerType || 0 !== event.button ) {
+				return;
+			}
+			down = true;
+			moved = false;
+			startX = event.clientX;
+			startLeft = el.scrollLeft;
+		} );
+
+		el.addEventListener( 'pointermove', function ( event ) {
+			if ( ! down ) {
+				return;
+			}
+			var dx = event.clientX - startX;
+			if ( ! moved && Math.abs( dx ) > 5 ) {
+				moved = true;
+				el.classList.add( 'is-dragging' );
+			}
+			if ( moved ) {
+				el.scrollLeft = startLeft - dx;
+			}
+		} );
+
+		var stop = function () {
+			down = false;
+			el.classList.remove( 'is-dragging' );
+		};
+		el.addEventListener( 'pointerup', stop );
+		el.addEventListener( 'pointerleave', stop );
+		el.addEventListener( 'pointercancel', stop );
+
+		// Nach dem Ziehen darf der Klick keine Pille auslösen.
+		el.addEventListener( 'click', function ( event ) {
+			if ( moved ) {
+				event.preventDefault();
+				event.stopPropagation();
+				moved = false;
+			}
+		}, true );
+	};
+
 	ChatbotWidget.prototype.autoGrow = function () {
 		this.input.style.height = 'auto';
-		this.input.style.height = Math.min( this.input.scrollHeight, 120 ) + 'px';
+		// scrollHeight misst ohne Rand; ohne den Zuschlag bliebe das Feld knapp zu klein und zeigte eine Scrollbar.
+		var needed = this.input.scrollHeight + ( this.input.offsetHeight - this.input.clientHeight );
+		this.input.style.height = Math.min( needed, 120 ) + 'px';
+		this.input.style.overflowY = needed > 120 ? 'auto' : 'hidden';
 	};
 
 	/**

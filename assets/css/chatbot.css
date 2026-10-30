@@ -377,10 +377,20 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    cursor: grab;
     gap: 6px;
     padding: 0 12px 12px;
     flex: 0 0 auto;
+}
+
+.chatbot-widget__suggestions::-webkit-scrollbar {
+    display: none;
+}
+
+.chatbot-widget__suggestions.is-dragging {
+    cursor: grabbing;
+    user-select: none;
 }
 
 .chatbot-widget__suggestions[hidden] {
@@ -426,6 +436,9 @@
     flex: 1 1 auto;
     resize: none;
     max-height: 120px;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    box-sizing: border-box;
     border: 0;
     outline: none;
     border-radius: 12px;
