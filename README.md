@@ -731,6 +731,10 @@ GPL-2.0-or-later – siehe [LICENSE.txt](LICENSE.txt).
 
 ## Changes
 
+### 1.3.3 - 2026-10-30
+
+- Widget: Die Vorschlags-Pillen lassen sich per Drag seitlich verschieben, ohne sichtbare Scrollbar; das Eingabefeld zeigt keine Scrollbar mehr. Die Asset-Version ändert sich, damit Browser die neuen Dateien laden
+
 ### 1.3.2 - 2026-10-29
 
 - Läuft unter PHP 7.4 ohne `str_starts_with()` und `str_contains()` (PHP 8): sechs Stellen nutzen jetzt `strpos()`. Auslöser: Prüfung durch das wordpress.org-Team; Verhalten unverändert
